@@ -26,8 +26,6 @@ exports.phoneNumCheck = async function (phoneNum) {
 };
 
 // Get Sign-Up Profile 
-
-//  프로필 조회
 exports.signUpProfile = async function (userIdx) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getProfileResult = await userDao.selectSignUpProfile(connection, userIdx);

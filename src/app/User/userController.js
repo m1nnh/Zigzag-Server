@@ -16,7 +16,7 @@ const regPhoneNum = /^\d{3}\d{3,4}\d{4}$/;
 /**
  * API No. 
  * API Name : 회원가입 API
- * [POST] /app/users/sign-up
+ * [POST] /users/sign-up
  */
 
 exports.postUsers = async function (req, res) {

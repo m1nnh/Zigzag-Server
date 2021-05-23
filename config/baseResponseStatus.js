@@ -20,8 +20,11 @@ module.exports = {
     SIGNUP_SMSFLAG_ERROR_TYPE : { "isSuccess": false, "code": 2009, "message":"SMS FLAG는 Y 또는 N을 입력해주세요." },
     SIGNUP_EMAILFLAG_EMPTY : { "isSuccess": false, "code": 2010, "message":"EMAIL FLAG를 입력해주세요." },
     SIGNUP_EMAILFLAG_ERROR_TYPE : { "isSuccess": false, "code": 2011, "message":"EMAIL FLAG는 Y 또는 N을 입력해주세요." },
-
-
+    PAGE_EMPTY : { "isSuccess": false, "code": 2012, "message":"page를 입력해주세요." },
+    PAGE_ERROR_TYPE : { "isSuccess": false, "code": 2013, "message":"page 번호를 확인해주세요." },
+    SIZE_EMPTY : { "isSuccess": false, "code": 2014, "message":"size를 입력해주세요." },
+    SIZE_ERROR_TYPE : { "isSuccess": false, "code": 2015, "message":"size 번호를 확인해주세요." },
+    
 
     // SIGNIN_EMAIL_EMPTY : { "isSuccess": false, "code": 2008, "message":"이메일을 입력해주세요" },
     // SIGNIN_EMAIL_LENGTH : { "isSuccess": false, "code": 2009, "message":"이메일은 30자리 미만으로 입력해주세요." },
