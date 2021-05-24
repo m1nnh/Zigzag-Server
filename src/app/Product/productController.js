@@ -21,10 +21,21 @@ const regSize = /^[0-9]/g;
  // userIdx 받아와야함!!
  exports.getHome = async function (req, res) {
 
+    // Token
+    const userIdx = req.verifiedToken.userIdx;
+
     // Request Query String
     let {page, size} = req.query;
 
     // Validation Check (Request Error)
+    if (!userIdx) 
+        return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
+
+    const checkUserIdx = await productProvider.userCheck(userIdx);
+
+    if (checkUserIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
+
     if (!page)
         return res.send(response(baseResponse.PAGE_EMPTY)); // 2012 : page를 입력해주세요.
     
@@ -36,9 +47,9 @@ const regSize = /^[0-9]/g;
 
     if (!regSize.test(size)) // 2015 : size 번호를 확인해주세요.
         return res.send(response(baseResponse.SIZE_ERROR_TYPE));
-   
+
     // Result
-    const homeResult = await productProvider.homeProduct(page, size);
+    const homeResult = await productProvider.homeProduct(userIdx, page, size);
 
     return res.send(response(baseResponse.SUCCESS, homeResult));
 

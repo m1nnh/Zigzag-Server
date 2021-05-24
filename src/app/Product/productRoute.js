@@ -3,7 +3,7 @@ module.exports = function(app){
     const jwtMiddleware = require('../../../config/jwtMiddleware');
 
     // API No ?. 홈 상품 조회 API
-    app.get('/products/home', product.getHome)
+    app.get('/products/home', jwtMiddleware, product.getHome)
    
 
 };

@@ -24,7 +24,8 @@ module.exports = {
     PAGE_ERROR_TYPE : { "isSuccess": false, "code": 2013, "message":"page 번호를 확인해주세요." },
     SIZE_EMPTY : { "isSuccess": false, "code": 2014, "message":"size를 입력해주세요." },
     SIZE_ERROR_TYPE : { "isSuccess": false, "code": 2015, "message":"size 번호를 확인해주세요." },
-    
+    USER_USERID_EMPTY : { "isSuccess": false, "code": 2016, "message": "userId를 입력해주세요." },
+    USER_USERID_NOT_EXIST : { "isSuccess": false, "code": 2017, "message": "해당 회원이 존재하지 않습니다." },
 
     // SIGNIN_EMAIL_EMPTY : { "isSuccess": false, "code": 2008, "message":"이메일을 입력해주세요" },
     // SIGNIN_EMAIL_LENGTH : { "isSuccess": false, "code": 2009, "message":"이메일은 30자리 미만으로 입력해주세요." },
