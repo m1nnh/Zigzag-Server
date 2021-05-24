@@ -1,120 +1,101 @@
-// 모든 유저 조회
-async function selectUser(connection) {
-  const selectUserListQuery = `
-                SELECT email, nickname 
-                FROM UserInfo;
-                `;
-  const [userRows] = await connection.query(selectUserListQuery);
-  return userRows;
+// Email Check
+async function selectEmail(connection, email) {
+
+  const selectEmailQuery = `
+    select exists(select userEmail from User where userEmail = ?) as exist;
+    `;
+
+  const [emailRow] = await connection.query(selectEmailQuery, email);
+  return emailRow;
 }
 
-// 이메일로 회원 조회
-async function selectUserEmail(connection, email) {
-  const selectUserEmailQuery = `
-                SELECT userEmail
-                FROM User
-                WHERE userEmail = ?;
-                `;
-  const [emailRows] = await connection.query(selectUserEmailQuery, email);
-  return emailRows;
+// PhoneNum Check
+async function selectPhoneNum(connection, phoneNum) {
+
+  const selectPhoneNumQuery = `
+    select exists(select userEmail from User where userPhoneNum = ?) as exist;
+   `;
+
+  const [phoneNumRow] = await connection.query(selectPhoneNumQuery, phoneNum);
+  return phoneNumRow;
 }
 
-// userId 회원 조회
-async function selectUserId(connection, userId) {
+// Sign-Up
+async function insertUser(connection, [email, hashedPassword, phoneNum, smsFlag, emailFlag]) {
+  
+  const insertUserQuery = `
+    INSERT INTO User(userEmail, userPassword, userPhoneNum, smsFlag, emailFlag)
+    VALUES (?, ?, ?, ?, ?);
+    `;
+
+  const insertUserRow = await connection.query(insertUserQuery, [email, hashedPassword, phoneNum, smsFlag, emailFlag]);
+  return insertUserRow;
+}
+
+// Get Sign-Up Profile
+async function selectSignUpProfile(connection, userIdx) {
+
   const selectUserIdQuery = `
-                 SELECT id, email, nickname 
-                 FROM UserInfo 
-                 WHERE id = ?;
-                 `;
-  const [userRow] = await connection.query(selectUserIdQuery, userId);
+    select userEmail, userPhoneNum, smsFlag, emailFlag
+    from User
+    where userIdx = ?;
+    `;
+
+  const [userRow] = await connection.query(selectUserIdQuery, userIdx);
   return userRow;
 }
 
+// Sign-In Check
+async function selectLogin(connection, [email, hashedPassword]) {
 
+  const loginCheckQuery = `
+    select userEmail, userPassword, userIdx, status
+    from User
+    where userEmail = ? and userPassword = ?;
+   `;
 
-// 패스워드 체크
-async function selectUserPassword(connection, selectUserPasswordParams) {
-  const selectUserPasswordQuery = `
-        SELECT userEmail, userPassword
-        FROM User
-        WHERE userEmail = ? AND userPassword = ?;`;
-  const selectUserPasswordRow = await connection.query(
-      selectUserPasswordQuery,
-      selectUserPasswordParams
-  );
-
-  return selectUserPasswordRow;
+  const [loginCheckRow] = await connection.query(loginCheckQuery, [email, hashedPassword]);
+  return loginCheckRow;
 }
 
-// 유저 계정 상태 체크 (jwt 생성 위해 id 값도 가져온다.)
-async function selectUserAccount(connection, email) {
-  const selectUserAccountQuery = `
-        SELECT status, userIdx
-        FROM User
-        WHERE userEmail = ?;`;
-  const selectUserAccountRow = await connection.query(
-      selectUserAccountQuery,
-      email
-  );
-  return selectUserAccountRow[0];
+// Patch All
+async function updateAll(connection, [userPhoneNum, userName, userIdx]) {
+  const updateAllQuery = `
+  update User
+  set userName = ?, userPhoneNum = ?
+  where userIdx = ?`;
+  const updateAllRow = await connection.query(updateAllQuery, [userName, userPhoneNum, userIdx]);
+  return updateAllRow[0];
 }
 
-async function updateUserInfo(connection, updateUserParams) {
-  const updateUserQuery = `
-  UPDATE User
-  SET userPhoneNum = ?, userName = ?
-  WHERE userIdx = ?;`;
-  const updateUserRow = await connection.query(updateUserQuery, updateUserParams);
-  return updateUserRow[0];
+// Patch Name
+async function updateName(connection, [userIdx, userName]) {
+  const updateNameQuery = `
+  update User
+  set userName = ?
+  where userIdx = ?`;
+  const updateNameRow = await connection.query(updateNameQuery, [userName, userIdx]);
+  return updateNameRow[0];
 }
 
-async function updateSetting(connection, updateSettingParams) {
-  const updateSettingQuery = `
-  UPDATE User
-  SET smsFlag = ?, emailFlag = ?,notiFlag = ?
-  WHERE userIdx = ?;
-  `
-  const updateSettingRow = await connection.query(updateSettingQuery, updateSettingParams);
-  return updateSettingRow[0];
+// Patch PhoneNum
+async function updatePhoneNum(connection, [userIdx, userPhoneNum]) {
+  const updatePhoneNumQuery = `
+  update User
+  set userPhoneNum = ?
+  where userIdx = ?`;
+  const updatePhoneNumRow = await connection.query(updatePhoneNumQuery, [userPhoneNum, userIdx]);
+  return updatePhoneNumRow[0];
 }
 
-async function updaterePayBank(connection, updaterePayBankParams) {
-  const updaterePayBankQuery = `
-  UPDATE User
-  SET rePayAccount = ?, reBank = ?
-  WHERE userIdx = ?
-  `
-  const updaterePayRow = await connection.query(updaterePayBankQuery, updaterePayBankParams);
-  return updaterePayRow[0];
-}
-
-// async function updatePayBank(connection, updatePayBankParams) {
-//   const updatePayBankQuery = `
-//   UPDATE User
-//   SET PayAccount = ?, PayBank = ?
-//   WHERE userIdx = ?
-//   `
-//   const updaterePayRow = await connection.query(updatePayBankQuery, updatePayBankParams);
-//   return updaterePayRow[0];
-// }
-
-// async function deletePayBank(connection, userId) {
-//   const deletePayBankQuery = `
-//   UPDATE User
-//   SET PayAccount = 0, PayBank = 0
-//   WEHRE userIdx = ?
-//   `
-//   const updaterePayRow = await connection.query(deletePayBankQuery, userId);
-//   return updaterePayRow[0];
-// }
 
 module.exports = {
-  selectUser,
-  selectUserEmail,
-  selectUserId,
-  selectUserPassword,
-  selectUserAccount,
-  updateUserInfo,
-  updaterePayBank,
-  updateSetting
+  selectEmail,
+  selectPhoneNum,
+  selectLogin,
+  insertUser,
+  selectSignUpProfile,
+  updateAll,
+  updateName,
+  updatePhoneNum
 };

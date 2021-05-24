@@ -3,12 +3,21 @@ const { logger } = require("../../../config/winston");
 
 const productDao = require("./productDao");
 
+// User Check
+exports.userCheck = async function (userIdx) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const userCheckResult = await productDao.selectUserIdx(connection, userIdx);
+  connection.release();
+
+  return userCheckResult;
+};
+
 // Get homeProduct
-exports.parentCategory = async function () {
+exports.homeProduct = async function (userIdx, page, size) {
     const connection = await pool.getConnection(async (conn) => conn);
-    const parentCategoryResult = await productDao.parentCategory(connection);
+    const homeProductResult = await productDao.selectHomeProduct(connection, [userIdx, page, size]);
   
     connection.release();
   
-    return parentCategoryResult[0];
+    return homeProductResult;
   };

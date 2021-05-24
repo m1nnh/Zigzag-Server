@@ -4,36 +4,56 @@ const productService = require("../../app/Product/productService");
 const baseResponse = require("../../../config/baseResponseStatus");
 const {response, errResponse} = require("../../../config/response");
 
-const regCategory = /^[0-9]/g;
+const {emit} = require("nodemon");
+
+// regex 
+
+const regPage = /^[0-9]/g;
+const regSize = /^[0-9]/g;
 
 
-exports.a = async function(req, res) {
-    let {categoryRef, categoryIdx} = req.query;
+/**
+ * API No. 
+ * API Name : 홈 상품 조회 API
+ * [GET] /products/home
+ */
+ exports.getHome = async function (req, res) {
 
-    // 모아보기 전체 카테고리 view
-    if(!categoryRef && !categoryIdx){
-        const moabokiResult = await productProvider.parentCategory();
-        return res.send(response(baseResponse.SUCCESS, moabokiResult));
-    }
+    // Request Token
+    const userIdx = req.verifiedToken.userIdx;
 
+    // Request Query String
+    let {page, size} = req.query;
+    
+    // Request Body
+    const bodyIdx = req.body;
+    
     // Validation Check (Request Error)
-    if(!categoryRef)
-         return res.send(errResponse(baseResponse.USER_ID_NOT_MATCH)); // categoryRef를 입력해 주세요.
+    if (!userIdx | !bodyIdx) 
+        return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
 
-    if (regCategory.test(categoryRef))
-         return res.send(errResponse(baseResponse.USER_ID_NOT_MATCH)); // categoryRef를 숫자로 입력해 주세요.
+    if (userIdx !== parseInt(bodyIdx.bodyIdx))
+        return res.send(errResponse(baseResponse.ID_NOT_MATCHING)); // 2020 : userId가 다릅니다.
 
-    if (!categoryIdx)
-        return res.send(errResponse(baseResponse.USER_ID_NOT_MATCH)); // categoryIdx를 입력해 주세요.
+    const checkUserIdx = await productProvider.userCheck(userIdx);
 
-    if (regCategory.test(categoryIdx))
-        return res.send(errResponse(baseResponse.USER_ID_NOT_MATCH)); // categoryIdx를 숫자로 입력해 주세요.
+    if (checkUserIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
 
-    //   if : 상위 카테고리 전체
-    //   else : 하위 카테고리 
-    if(categoryRef === categoryIdx){
+    if (!page)
+        return res.send(response(baseResponse.PAGE_EMPTY)); // 2012 : page를 입력해주세요.
+    
+    if (!regPage.test(page) & page < 1) // 2013 : page 번호를 확인해주세요.
+        return res.send(response(baseResponse.PAGE_ERROR_TYPE));
 
-    } else{
+    if (!size) // 2014 : size를 입력해주세요.
+        return res.send(response(baseResponse.SIZE_EMPTY));
 
-    } 
-}
+    if (!regSize.test(size) & size < 1) // 2015 : size 번호를 확인해주세요.
+        return res.send(response(baseResponse.SIZE_ERROR_TYPE));
+
+    // Result
+    const homeResult = await productProvider.homeProduct(userIdx, page, size);
+
+    return res.send(response(baseResponse.SUCCESS, homeResult));
+ }
