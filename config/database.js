@@ -7,7 +7,7 @@ const pool = mysql.createPool({
     user: 'minh',
     port: '3306',
     password: 'wlsgkrp3512',
-    database: 'zigzag'
+    database: 'tommy'
 });
 
 module.exports = {
