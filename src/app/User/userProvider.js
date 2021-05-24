@@ -1,5 +1,6 @@
 const { pool } = require("../../../config/database");
 const { logger } = require("../../../config/winston");
+const { login } = require("./userController");
 
 const userDao = require("./userDao");
 
@@ -25,6 +26,14 @@ exports.phoneNumCheck = async function (phoneNum) {
   return phoneNumCheckResult;
 };
 
+// Sign-In Check
+exports.loginCheck = async function (email, hashedPassword) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const loginCheckResult = await userDao.selectLogin(connection, [email, hashedPassword]);
+  connection.release();
+  return loginCheckResult;
+};
+
 // Get Sign-Up Profile 
 exports.signUpProfile = async function (userIdx) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -34,4 +43,3 @@ exports.signUpProfile = async function (userIdx) {
 
   return getProfileResult[0];
 };
-

@@ -11,7 +11,7 @@ module.exports = {
     //Request error
     SIGNUP_EMAIL_EMPTY : { "isSuccess": false, "code": 2001, "message":"이메일을 입력해주세요." },
     SIGNUP_EMAIL_LENGTH : { "isSuccess": false, "code": 2002, "message":"이메일은 30자리 미만으로 입력해주세요." },
-    SIGNUP_EMAIL_ERROR_TYPE : { "isSuccess": false, "code": 2003, "message":"이메일을 형식을 정확하게 입력해주세요." },
+    SIGNUP_EMAIL_ERROR_TYPE : { "isSuccess": false, "code": 2003, "message":"이메일 형식을 정확하게 입력해주세요." },
     SIGNUP_PASSWORD_EMPTY : { "isSuccess": false, "code": 2004, "message": "비밀번호를 입력해주세요." },
     SIGNUP_PASSWORD_ERROR_TYPE : { "isSuccess": false, "code": 2005, "message":"비밀번호는 영문, 숫자, 특수문자 포함 8~16 자리를 입력해주세요." },
     SIGNUP_PHONE_EMPTY : { "isSuccess": false, "code": 2006, "message":"휴대폰 번호를 입력해주세요." },
@@ -26,12 +26,16 @@ module.exports = {
     SIZE_ERROR_TYPE : { "isSuccess": false, "code": 2015, "message":"size 번호를 확인해주세요." },
     USER_USERID_EMPTY : { "isSuccess": false, "code": 2016, "message": "userId를 입력해주세요." },
     USER_USERID_NOT_EXIST : { "isSuccess": false, "code": 2017, "message": "해당 회원이 존재하지 않습니다." },
-
+    PASSWORD_EMPTY : { "isSuccess": false, "code": 2018, "message": "비밀번호를 입력해주세요." },
+    PASSWORD_LENGTH : { "isSuccess": false, "code": 2019, "message": "6자리 이상의 비밀번호를 입력해주세요." },
+    ID_NOT_MATCHING : { "isSuccess": false, "code": 2020, "message": "userId가 다릅니다." },
+    NAME_EMPTY : { "isSuccess": false, "code": 2021, "message": "이름을 입력해주세요." },
+    NAME_ERROR_TYPE : { "isSuccess": false, "code": 2022, "message": "이름을 형식에 맞게 입력해주세요." },
     // Response error
     SIGNUP_REDUNDANT_EMAIL : { "isSuccess": false, "code": 3001, "message":"중복된 이메일입니다." },
     SIGNUP_REDUNDANT_PHONENUM : { "isSuccess": false, "code": 3002, "message":"중복된 휴대폰 번호입니다." },
 
-    SIGNIN_EMAIL_WRONG : { "isSuccess": false, "code": 3003, "message": "아이디가 잘못 되었습니다." },
+    SIGNIN_EMAIL_WRONG : { "isSuccess": false, "code": 3003, "message": "이메일이 잘못 되었습니다." },
     SIGNIN_PASSWORD_WRONG : { "isSuccess": false, "code": 3004, "message": "비밀번호가 잘못 되었습니다." },
     SIGNIN_INACTIVE_ACCOUNT : { "isSuccess": false, "code": 3005, "message": "비활성화 된 계정입니다. 고객센터에 문의해주세요." },
     SIGNIN_WITHDRAWAL_ACCOUNT : { "isSuccess": false, "code": 3006, "message": "탈퇴 된 계정입니다. 고객센터에 문의해주세요." },

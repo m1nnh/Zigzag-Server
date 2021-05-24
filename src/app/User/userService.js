@@ -36,3 +36,72 @@ exports.createUser = async function (email, password, phoneNum, smsFlag, emailFl
     }
 };
 
+// Sign-In
+exports.postSignIn = async function (email, password) {
+    try {
+        // Hashed Password
+        const hashedPassword = await crypto
+        .createHash("sha512")
+        .update(password)
+        .digest("hex");
+
+        const signInResponse = await userProvider.loginCheck(email, hashedPassword);
+
+        // Validation Check (Response Error)
+        if (signInResponse[0].userPassword !== hashedPassword)
+            return res.send(response(baseResponse.SIGNIN_PASSWORD_WRONG)); // 3004 : 비밀번호가 잘못 되었습니다.
+
+        if (signInResponse[0].status == 'Y')
+            return res.send(response(baseResponse.SIGNIN_WITHDRAWAL_ACCOUNT)); // 3006 : 탈퇴 된 계정입니다. 고객센터에 문의해주세요.
+
+        //토큰 생성 Service
+        let token = await jwt.sign(
+            {
+                userIdx: signInResponse[0].userIdx,
+            }, // 토큰의 내용(payload)
+            secret_config.jwtsecret, // 비밀키
+            {
+                expiresIn: "365d",
+                subject: "userInfo",
+            } // 유효 기간 365일
+        );
+
+        return response(baseResponse.SUCCESS, {'userIdx': signInResponse[0].userIdx, 'jwt': token});
+
+    } catch (err) {
+        logger.error(`App - postSignIn Service error\n: ${err.message} \n${JSON.stringify(err)}`);
+        return errResponse(baseResponse.DB_ERROR);
+    }
+}
+
+
+
+// Patch All
+exports.editUser = async function (userPhoneNum, userName, userIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const updateAllResult = await userDao.updateAll(connection, [userPhoneNum, userName, userIdx]);
+
+    connection.release();
+
+    return updateAllResult;
+}
+
+// Patch Name
+exports.editName = async function (userIdx, userName) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const updateNameResult = await userDao.updateName(connection, [userIdx, userName]);
+
+    connection.release();
+
+    return updateNameResult;
+}
+
+// Patch PhoneNum
+exports.editPhoneNum = async function (userIdx, userPhoneNum) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const updatePhoneNumResult = await userDao.updateAll(connection, [userIdx, userPhoneNum]);
+
+    connection.release();
+
+    return updatePhoneNumResult;
+}

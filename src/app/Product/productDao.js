@@ -1,7 +1,7 @@
 // UserIdx Check
 async function selectUserIdx(connection, userIdx) {
   const userIdxQuery = `
-    select exists(select userIdx from User where userIndex = ?) as exist;
+    select exists(select userIdx from User where userIdx = ?) as exist;
      `;
   const [userIdxRow] = await connection.query(userIdxQuery, userIdx);
   return userIdxRow;
@@ -35,10 +35,11 @@ async function selectHomeProduct(connection, [userIdx, page, size]) {
          left join Store s on s.storeIdx = p.storeIdx
          left join LikeProduct lp on lp.productIdx = p.productIdx
          left join User u on u.userIdx = ?
-      order by rand()` + page + `, ` + size + `;
+      order by rand()
+      limit ` + page + `, ` + size + `;
       `;
-  
     const [homeProductRow] = await connection.query(homeProductQuery, [userIdx, page, size]);
+    
     return homeProductRow;
   }
 

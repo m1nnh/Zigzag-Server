@@ -17,19 +17,23 @@ const regSize = /^[0-9]/g;
  * API Name : 홈 상품 조회 API
  * [GET] /products/home
  */
-
- // userIdx 받아와야함!!
  exports.getHome = async function (req, res) {
 
-    // Token
+    // Request Token
     const userIdx = req.verifiedToken.userIdx;
 
     // Request Query String
     let {page, size} = req.query;
-
+    
+    // Request Body
+    const bodyIdx = req.body;
+    
     // Validation Check (Request Error)
-    if (!userIdx) 
+    if (!userIdx | !bodyIdx) 
         return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
+
+    if (userIdx !== parseInt(bodyIdx.bodyIdx))
+        return res.send(errResponse(baseResponse.ID_NOT_MATCHING)); // 2020 : userId가 다릅니다.
 
     const checkUserIdx = await productProvider.userCheck(userIdx);
 
@@ -45,12 +49,11 @@ const regSize = /^[0-9]/g;
     if (!size) // 2014 : size를 입력해주세요.
         return res.send(response(baseResponse.SIZE_EMPTY));
 
-    if (!regSize.test(size)) // 2015 : size 번호를 확인해주세요.
+    if (!regSize.test(size) & size < 1) // 2015 : size 번호를 확인해주세요.
         return res.send(response(baseResponse.SIZE_ERROR_TYPE));
 
     // Result
     const homeResult = await productProvider.homeProduct(userIdx, page, size);
 
     return res.send(response(baseResponse.SUCCESS, homeResult));
-
  }
