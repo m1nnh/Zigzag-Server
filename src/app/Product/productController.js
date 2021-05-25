@@ -358,7 +358,7 @@ exports.getBest = async function (req, res) {
 exports.category = async function(req, res) {
     
     // Request Query String
-    let {categoryIdx, page, size, orderfilter, delivary, color, age, price} = req.query;
+    let {categoryIdx, page, size, orderfilter, delivary} = req.query;
 
     // Request Body
     const userIdx = req.body;
@@ -366,7 +366,7 @@ exports.category = async function(req, res) {
     var where = ' AND ';
     let order = ' ORDER BY ';
     let categoryResult
-    page = size*(page-1);
+
 
     // 모아보기 전체 카테고리 view
     if(!categoryIdx){
@@ -395,7 +395,8 @@ exports.category = async function(req, res) {
     if (!regCategory.test(size) & size < 1)
         return res.send(errResponse(baseResponse.PRODUCT_SIZE_STYLE)); // size를 숫자로 입력해 주세요.
     
-
+    page = size*(page-1);
+    
      //   if : 상위 카테고리 전체
      //   else : 하위 카테고리 
      //  1~14번 104번 인덱스는 상위 카테고리 상품(c.categoryRef = ?) 으로 조회
