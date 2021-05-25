@@ -54,19 +54,26 @@ const regSize = /^[0-9]/g;
 
     page = size * (page-1);
 
-    // Result
+    // Home Product Result
     let homeResult = await productProvider.homeProduct(page, size);
+    // Status Result
     let getLikeProductStatus = await productProvider.likeProductStatus(userIdx);
 
+    // Home Product Result <- Status
     for (var i = 0; i < homeResult.length; i++) {
+        
         var flag = 0;
+        
         for (var j = 0; j < getLikeProductStatus.length; j++) {
+            
             if (homeResult[i].productIdx === getLikeProductStatus[j].productIdx) {
                 homeResult[i]["likeProductStatus"] = getLikeProductStatus[j].status;
                 flag = 1;
                 break;
             }
         }
+
+        // Home Product Result 'N' Insert
         if (flag === 0)
             homeResult[i]["likeProductStatus"] = 'N';
     }
@@ -116,19 +123,27 @@ exports.getBrand = async function (req, res) {
     
     page = size * (page-1);
 
-    // Result
+    // Brand Product Result
     let brandResult = await productProvider.brandProduct(page, size);
+
+    // Status Result
     let getLikeProductStatus = await productProvider.likeProductStatus(userIdx);
 
+    // Brand Product Result <- Status
     for (var i = 0; i < brandResult.length; i++) {
+        
         var flag = 0;
+        
         for (var j = 0; j < getLikeProductStatus.length; j++) {
+            
             if (brandResult[i].productIdx === getLikeProductStatus[j].productIdx) {
                 brandResult[i]["likeProductStatus"] = getLikeProductStatus[j].status;
                 flag = 1;
                 break;
             }
         }
+
+        // Brand Product Result 'N' Insert
         if (flag === 0)
             brandResult[i]["likeProductStatus"] = 'N';
     }
@@ -167,7 +182,8 @@ exports.getBrandRank = async function (req, res) {
     if (checkUserIdx[0].exist === 0)
         return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
 
-    switch (filter.filter) {
+    // Category Filtering
+    switch (filter) {
         case '1' : condition += 'where c.categoryRef between 1 and 5'; break;
         case '2' : condition += 'where c.categoryRef = 7'; break;
         case '3' : condition += 'where c.categoryRef = 6'; break;
@@ -176,32 +192,45 @@ exports.getBrandRank = async function (req, res) {
         case '6' : condition += 'where c.categoryRef = 9'; break;
         default : break;
     }
+
+    // Rank Result
     var rankResult = await productProvider.brandRank(condition);
+
+    // Bookmark Status
     var bookMarkStatus = await productProvider.bookMarkStatus(userIdx);
 
+    // Rank Result <- Status
     for (var i = 0; i < rankResult.length; i++) {
+        
         var flag = 0;
+        
         for (var j = 0; j < bookMarkStatus.length; j++) {
+            
             if (rankResult[i].brandIdx === bookMarkStatus[j].brandIdx) {
                 rankResult[i]["bookMarkStatus"] = bookMarkStatus[j].status;
                 flag = 1;
                 break;
             }
         }
+
+        // Rank Result 'N' Insert
         if (flag === 0)
             rankResult[i]["bookMarkStatus"] = 'N';
     }
 
+    // Rank Result <- Product
     for (var i = 0; i < 3; i++) {
+        
         if (i >= rankResult.length )
             break;
+
         var brandProductResult = await productProvider.brandRankProduct(rankResult[i].brandIdx);
         rankResult[i]["product"] = brandProductResult;
     }
+
     return res.send(response(baseResponse.SUCCESS,rankResult));
 
 }
-
 
  /**
  * API No. 
@@ -214,12 +243,13 @@ exports.getBest = async function (req, res) {
     const userIdx = req.verifiedToken.userIdx;
 
     // Request Query String
-    let {page, size} = req.query;
+    let {page, size, filter, agefilter} = req.query;
     
     // Request Body
     const bodyIdx = req.body;
 
     let condition = ''
+    var agecondition = ' and u.birth between '
 
     // Validation Check (Request Error)
     if (!userIdx | !bodyIdx) 
@@ -245,7 +275,8 @@ exports.getBest = async function (req, res) {
     if (!regSize.test(size) & size < 1) // 2015 : size 번호를 확인해주세요.
         return res.send(response(baseResponse.SIZE_ERROR_TYPE));
     
-    switch (filter.filter) {
+    // Category Filtering
+    switch (filter) {
         case '1' : condition += 'where c.categoryRef = 1'; break;
         case '2' : condition += 'where c.categoryRef = 2'; break;
         case '3' : condition += 'where c.categoryRef = 3'; break;
@@ -261,11 +292,46 @@ exports.getBest = async function (req, res) {
         case '13' : condition += 'where c.categoryRef = 13'; break;
         default : break;
     }
+
+    // Not Category Filtering
+    if (!condition) 
+        agecondition = 'where u.birth between '
+
+    // Age Filtering
+    switch (agefilter) {
+        case '1' : agecondition += '2003 and 2012'; break;
+        case '2' : agecondition += '1993 and 2002'; break;
+        case '3' : agecondition += '1983 and 1992'; break;
+        default : agecondition = ''; break;
+    }
+
     page = size * (page-1);
 
-    // Result
-    const bestResult = await productProvider.bestProduct(userIdx, page, size);
+    // Best Product Result
+    const bestResult = await productProvider.bestProduct(page, size, condition, agecondition);
 
+    // Status Result
+    let getLikeProductStatus = await productProvider.likeProductStatus(userIdx);
+
+    // Best Product Result <- Status
+    for (var i = 0; i < bestResult.length; i++) {
+        
+        var flag = 0;
+        
+        for (var j = 0; j < getLikeProductStatus.length; j++) {
+            
+            if (bestResult[i].productIdx === getLikeProductStatus[j].productIdx) {
+                bestResult[i]["likeProductStatus"] = getLikeProductStatus[j].status;
+                flag = 1;
+                break;
+            }
+        }
+
+        // Best Product 'N' Insert
+        if (flag === 0)
+            bestResult[i]["likeProductStatus"] = 'N';
+    }
+    
     return res.send(response(baseResponse.SUCCESS, bestResult));
 
 }

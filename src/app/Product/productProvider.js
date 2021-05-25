@@ -73,9 +73,9 @@ exports.brandRankProduct = async function (brandIdx) {
 };
 
 // Get Best Product
-exports.bestProduct = async function (userIdx, page, size) {
+exports.bestProduct = async function (page, size, condition, agecondition) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const bestProductResult = await productDao.selectBestProduct(connection, [userIdx, page, size]);
+  const bestProductResult = await productDao.selectBestProduct(connection, [page, size, condition, agecondition]);
 
   connection.release();
 

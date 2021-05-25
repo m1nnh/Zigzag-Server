@@ -144,13 +144,43 @@ async function selectRankBrandProduct(connection, brandIdx) {
 }
 
 // Get Best Product
-async function selectBestProduct(connection, [userIdx, page, size]) {
+async function selectBestProduct(connection, [page, size, condition, agecondition]) {
 
   const bestProductQuery = `
-    
+    select p.storeIdx,
+    p.productIdx,
+    ThumbnailUrl,
+    zFlag,
+    s.storeName,
+    productContents,
+    case
+        when productSale > 0 and zSaleFlag = 'N'
+            then concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
+        when productSale > 0 and zSaleFlag = 'Y'
+            then concat('제트할인가 ', productPrice, '\n', productSale, '% ',
+                        format(productPrice * ((100 - productSale) / 100), 0))
+        else
+            format(productPrice, 0) end as resultPrice,
+    case
+        when s.deliveryPrice = 0
+            then '무료배송'
+        else
+            '' end                      as deliveryPrice
+  from Product p
+      left join Store s on s.storeIdx = p.storeIdx
+          left join Category c on c.categoryIdx = p.categoryIdx
+      left join (select ifnull(count(rc.productIdx), 0) as readCount, rc.productIdx, rc.userIdx
+
+                        from ReadCount rc
+                group by rc.productIdx) as v on v.productIdx = p.productIdx
+      left join User u on v.userIdx = u.userIdx
+  ` + condition + ` `+ agecondition +`
+  group by p.productIdx
+  order by readCount DESC
+  limit ` + page + `, ` + size + `;
   `;
-    
-  const [bestProductRow] = await connection.query(bestProductQuery, [userIdx, page, size]);
+
+  const [bestProductRow] = await connection.query(bestProductQuery, [page, size, condition, agecondition]);
   
   return bestProductRow;
   }
