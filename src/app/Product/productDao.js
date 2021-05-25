@@ -135,7 +135,7 @@ async function selectBookMarkStatus(connection, userIdx) {
 // Get Rank Brand Product
 async function selectRankBrandProduct(connection, brandIdx) {
 
-  const brandProductQuery = `select s.storeIdx, p.productIdx, p.ThumbnailUrl
+  const brandProductQuery = `select s.storeIdx, p.productIdx, p.thumbnailUrl
   from Brand b
   left join Product p on p.brandIdx = b.brandIdx
   left join Store s on s.storeIdx = p.storeIdx
