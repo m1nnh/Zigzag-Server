@@ -31,6 +31,7 @@ module.exports = {
     ID_NOT_MATCHING : { "isSuccess": false, "code": 2020, "message": "userId가 다릅니다." },
     NAME_EMPTY : { "isSuccess": false, "code": 2021, "message": "이름을 입력해주세요." },
     NAME_ERROR_TYPE : { "isSuccess": false, "code": 2022, "message": "이름을 형식에 맞게 입력해주세요." },
+    EMAIL_NOT_EMPTY : { "isSuccess": false, "code": 2023, "message": "해당 이메일이 존재하지 않습니다." },
     // Response error
     SIGNUP_REDUNDANT_EMAIL : { "isSuccess": false, "code": 3001, "message":"중복된 이메일입니다." },
     SIGNUP_REDUNDANT_PHONENUM : { "isSuccess": false, "code": 3002, "message":"중복된 휴대폰 번호입니다." },

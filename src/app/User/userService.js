@@ -74,8 +74,6 @@ exports.postSignIn = async function (email, password) {
     }
 }
 
-
-
 // Patch All
 exports.editUser = async function (userPhoneNum, userName, userIdx) {
     const connection = await pool.getConnection(async (conn) => conn);
