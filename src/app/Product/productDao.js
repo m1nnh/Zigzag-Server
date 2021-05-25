@@ -14,7 +14,7 @@ async function selectHomeProduct(connection, [page, size]) {
   const homeProductQuery = `
   select p.storeIdx,
       p.productIdx,
-      ThumbnailUrl,
+      thumbnailUrl,
       zFlag,
       s.storeName,
       productContents,
@@ -66,7 +66,7 @@ async function selectBrandProduct(connection, [page, size]) {
   const brandProductQuery = `
     select p.storeIdx,
        p.productIdx,
-       ThumbnailUrl,
+       thumbnailUrl,
        zFlag,
        b.brandName,
        productContents,
@@ -154,7 +154,7 @@ async function selectBestProduct(connection, [page, size, condition, ageconditio
   const bestProductQuery = `
     select p.storeIdx,
     p.productIdx,
-    ThumbnailUrl,
+    thumbnailUrl,
     zFlag,
     s.storeName,
     productContents,
@@ -223,7 +223,7 @@ async function likeProductStatus (connection, userIdx) {
 }
 async function detailCategoryIdx(connection, categoryIdx, where, order, page, size) {
     const detailCategoryIdxQuery = `
-               SELECT p.productIdx, p.storeIdx, ThumbnailUrl, s.storeName, lp.status, productContents , p.brandIdx,
+               SELECT p.productIdx, p.storeIdx, thumbnailUrl, s.storeName, lp.status, productContents , p.brandIdx,
                CASE
                WHEN productSale > 0 and zSaleFlag = 'N'
                THEN concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
@@ -252,7 +252,7 @@ async function detailCategoryIdx(connection, categoryIdx, where, order, page, si
 } // 상세 카테고리 상품 조회
 async function detailCategoryRef(connection, categoryIdx, where, order, page, size) {
   const detailCategoryRefQuery = `
-               SELECT p.productIdx, p.storeIdx, ThumbnailUrl, s.storeName, lp.status, productContents, p.brandIdx,
+               SELECT p.productIdx, p.storeIdx, thumbnailUrl, s.storeName, lp.status, productContents, p.brandIdx,
                CASE
                WHEN productSale > 0 and zSaleFlag = 'N'
                THEN concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
