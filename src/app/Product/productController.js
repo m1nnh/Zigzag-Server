@@ -79,6 +79,7 @@ const regSize = /^[0-9]/g;
     }
     
     return res.send(response(baseResponse.SUCCESS, homeResult));
+
  }
 
  /**
