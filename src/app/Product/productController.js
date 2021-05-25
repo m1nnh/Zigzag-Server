@@ -10,7 +10,7 @@ const {emit} = require("nodemon");
 
 const regPage = /^[0-9]/g;
 const regSize = /^[0-9]/g;
-
+const regCategory = /^[0-9]/g;
 
 /**
  * API No. 
@@ -335,4 +335,134 @@ exports.getBest = async function (req, res) {
     
     return res.send(response(baseResponse.SUCCESS, bestResult));
 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+////////////////// 여기서부터 토미
+ /**
+ * API No. 
+ * API Name : 모아보기 카테고리 조회 API
+ * [GET] /products/category
+ */
+exports.category = async function(req, res) {
+    
+    // Request Query String
+    let {categoryIdx, page, size, orderfilter, delivary, color, age, price} = req.query;
+
+    // Request Body
+    const userIdx = req.body;
+
+    var where = ' AND ';
+    let order = ' ORDER BY ';
+    let categoryResult
+    page = size*(page-1);
+
+    // 모아보기 전체 카테고리 view
+    if(!categoryIdx){
+
+        const moabokiResult = await productProvider.getParentCategory();
+        return res.send(response(baseResponse.SUCCESS, moabokiResult));
+
+    }
+
+    // Validation Check (Request Error)
+    if(!categoryIdx)
+         return res.send(errResponse(baseResponse.PRODUCT_CATEGORYIDX_EMPTY)); // categoryRef를 입력해 주세요.
+
+    if (!regCategory.test(categoryIdx) & categoryIdx < 1)
+         return res.send(errResponse(baseResponse.PRODUCT_CATEGORYIDX_STYLE)); // categoryRef를 숫자로 입력해 주세요.
+    
+    if (!page)
+        return res.send(errResponse(baseResponse.PRODUCT_PAGE_EMPTY)); // page를 입력해 주세요.
+    
+    if (!regCategory.test(page) & page < 1)
+        return res.send(errResponse(baseResponse.PRODUCT_PAGE_STYLE)); // page를 숫자로 입력해 주세요.
+    
+    if (!size)
+        return res.send(errResponse(baseResponse.PRODUCT_SIZE_EMPTY)); // size를 입력해 주세요.
+    
+    if (!regCategory.test(size) & size < 1)
+        return res.send(errResponse(baseResponse.PRODUCT_SIZE_STYLE)); // size를 숫자로 입력해 주세요.
+    
+
+     //   if : 상위 카테고리 전체
+     //   else : 하위 카테고리 
+     //  1~14번 104번 인덱스는 상위 카테고리 상품(c.categoryRef = ?) 으로 조회
+     // 나머지 인덱스는 c.categoryIdx = ? 로 조회
+
+     switch(orderfilter){
+        case "1" : order += 'count(r.reviewIdx) DESC'; break; // 리뷰 많은 순
+        case "2" : order += 'p.createdAt DESC'; break; // 신상품 순
+        case "3" : order += 'resultPrice'; break; // 가격 오름순
+        case "4" : order += 'resultPrice DESC'; break; // 가격 내림순
+        default : order += 'count(rc.readIdx) DESC'; break; // 인기순
+    }
+
+    if(delivary == 0)
+        where += 's.deliveryPrice = 0'
+    else
+        where = ''
+
+     // Result 
+     let likeProductStatusResult = await productProvider.getLikeProductStatus(userIdx);
+     const childCategoryResult = await productProvider.getChildCategory(categoryIdx);
+
+
+     if(0<categoryIdx<14 || categoryIdx == 104){
+        categoryResult = await productProvider.getDetailCategoryRef(categoryIdx, where, order, page, size);
+     } else{
+        categoryResult = await productProvider.getDetailCategoryIdx(categoryIdx, where, order, page, size);
+     }
+
+     categoryResult = await this.isLikeProduct(categoryResult, likeProductStatusResult);
+
+     return res.send(response(baseResponse.SUCCESS, {childCategoryResult, categoryResult}));
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Like Status 
+isLikeProduct = async function(productResult, likeStatusResult) {
+    for (var i = 0; i < productResult.length; i++) {
+        var flag = 0;
+        for (var j = 0; j < likeStatusResult.length; j++) {
+            if (productResult[i].productIdx === likeStatusResult[j].productIdx) {
+                productResult[i]["likeProductStatus"] = likeStatusResult[j].status;
+                flag = 1;
+                break;
+            }
+        }
+        // Home Product Result 'N' Insert
+        if (flag === 0)
+        productResult[i]["likeProductStatus"] = 'N';
+    }
+    return productResult
 }

@@ -29,7 +29,12 @@ async function selectHomeProduct(connection, [page, size]) {
         when s.deliveryPrice = 0
               then '무료배송'
           else
-                  '' end as deliveryPrice
+                  '' end as deliveryPrice,
+      case
+          when p.brandIdx is null
+              then ''
+          else
+              '브랜드' end                   as brandStatus
     from Product p
         left join Store s on s.storeIdx = p.storeIdx
     order by rand()
@@ -185,6 +190,108 @@ async function selectBestProduct(connection, [page, size, condition, ageconditio
   return bestProductRow;
   }
 
+
+
+// 여기서부터 토미
+
+async function parentCategory(connection) {
+  const parentCategoryQuery = `
+                SELECT categoryName, categoryIdx
+                FROM Category
+                WHERE status = 'L';
+                `;
+  const [moabokiRows] = await connection.query(parentCategoryQuery);
+  return moabokiRows;
+}
+async function childCategory(connection, categoryIdx) {
+  const childCategoryQuery = `
+                SELECT categoryIdx, categoryName
+                FROM Category
+                WHERE categoryRef = ?;
+                `;
+  const [moabokiRows] = await connection.query(childCategoryQuery, [categoryIdx]);
+  return moabokiRows;
+}  
+async function likeProductStatus (connection, userIdx) {
+  const likeProductStatusQuery = `
+  SELECT lp.productIdx, lp.status
+  FROM LikeProduct lp
+  WHERE lp.userIdx = ?
+  `
+  const [likeProductStatusRows] = await connection.query(likeProductStatusQuery, [userIdx]);
+  return likeProductStatusRows;
+}
+async function detailCategoryIdx(connection, categoryIdx, where, order, page, size) {
+    const detailCategoryIdxQuery = `
+               SELECT p.productIdx, p.storeIdx, ThumbnailUrl, s.storeName, lp.status, productContents , p.brandIdx,
+               CASE
+               WHEN productSale > 0 and zSaleFlag = 'N'
+               THEN concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
+               WHEN productSale > 0 and zSaleFlag = 'Y'
+               then concat('제트할인가 ', productPrice, '\n',productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
+               ELSE format(productPrice, 0) end as resultPrice,
+               CASE
+               WHEN s.deliveryPrice = 0
+               THEN '무료배송'
+               ELSE '' end as deliveryPrice
+               FROM zigzag.Product p
+               LEFT JOIN Store s ON s.storeIdx = p.storeIdx
+               LEFT JOIN LikeProduct lp ON lp.productIdx = p.productIdx
+               LEFT JOIN Category c ON c.categoryIdx = p.categoryIdx
+               LEFT JOIN Basket b ON b.productIdx = p.productIdx
+               LEFT JOIN OrderProduct op ON op.basketIdx = b.basketIdx
+               LEFT JOIN Review r ON r.orderIdx = op.orderIdx
+               LEFT JOIN ReadCount rc ON p.productIdx = rc.productIdx
+               WHERE p.categoryIdx = ?
+               `+where+`
+               GROUP BY p.productIdx
+               `+ order +`
+               limit ` + page + `, ` + size + `;`
+  const [moabokiRows] = await connection.query(detailCategoryIdxQuery, [categoryIdx, where, order, page, size]);
+  return moabokiRows;
+} // 상세 카테고리 상품 조회
+async function detailCategoryRef(connection, categoryIdx, where, order, page, size) {
+  const detailCategoryRefQuery = `
+               SELECT p.productIdx, p.storeIdx, ThumbnailUrl, s.storeName, lp.status, productContents, p.brandIdx,
+               CASE
+               WHEN productSale > 0 and zSaleFlag = 'N'
+               THEN concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
+               WHEN productSale > 0 and zSaleFlag = 'Y'
+               then concat('제트할인가 ', productPrice, '\n',productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
+               ELSE format(productPrice, 0) end as resultPrice,
+               CASE
+               WHEN s.deliveryPrice = 0
+               THEN '무료배송'
+               ELSE '' end as deliveryPrice
+               FROM zigzag.Product p
+               LEFT JOIN Store s ON s.storeIdx = p.storeIdx
+               LEFT JOIN LikeProduct lp ON lp.productIdx = p.productIdx
+               LEFT JOIN Category c ON c.categoryidx = p.categoryIdx
+               LEFT JOIN Basket b ON b.productIdx = p.productIdx
+               LEFT JOIN OrderProduct op ON op.basketIdx = b.basketIdx
+               LEFT JOIN Review r ON r.orderIdx = op.orderIdx
+               LEFT JOIN ReadCount rc ON p.productIdx = rc.productIdx
+               WHERE c.categoryRef = ? 
+               `+where+`
+               GROUP BY p.productIdx
+               ` + order + `
+               limit ` + page + `, ` + size + `;`
+  const [moabokiRows] = await connection.query(detailCategoryRefQuery, [categoryIdx, where, order, page, size]);
+  return moabokiRows;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 module.exports = {
     selectHomeProduct,
     selectLikeProductStatus,
@@ -193,6 +300,18 @@ module.exports = {
     selectBrandRank,
     selectBookMarkStatus,
     selectRankBrandProduct,
-    selectBestProduct
+    selectBestProduct,
+
+
+
+
+
+
+
+    parentCategory,
+    childCategory,
+    likeProductStatus,
+    detailCategoryIdx,
+    detailCategoryRef 
   };
   

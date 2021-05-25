@@ -13,4 +13,8 @@ module.exports = function(app){
 
     // API No ?. 베스트 상품 조회 API
     app.get('/products/best', jwtMiddleware, product.getBest);
+
+    // API No ?. 모아보기 카테고리 조회 API
+    app.get('/products/category', product.category);
+    
 };

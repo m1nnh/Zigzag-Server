@@ -81,3 +81,72 @@ exports.bestProduct = async function (page, size, condition, agecondition) {
 
   return bestProductResult;
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+// 여기서부터 토미
+
+//
+exports.getParentCategory = async function () {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const parentCategoryResult = await productDao.parentCategory(connection);
+  connection.release();
+  return parentCategoryResult;
+};
+
+//
+exports.getChildCategory = async function (categoryIdx) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const parentCategoryResult = await productDao.childCategory(connection, categoryIdx);
+  connection.release();
+  return parentCategoryResult;
+};
+
+//
+exports.getDetailCategoryIdx = async function (categoryIdx, where, order, page, size) {
+    try {
+      const connection = await pool.getConnection(async (conn) => conn);
+      const parentCategoryResult = await productDao.detailCategoryIdx(connection, categoryIdx, where, order, page, size);
+      connection.release();
+      return parentCategoryResult;
+    } catch (error) {
+        console.log(error);
+        return errResponse(baseResponse.DB_ERROR);
+    }
+};
+
+//
+exports.getDetailCategoryRef = async function (categoryIdx, where, order, page, size) {
+    try {
+      const connection = await pool.getConnection(async (conn) => conn);
+      const parentCategoryResult = await productDao.detailCategoryRef(connection, categoryIdx, where, order, page, size);
+      connection.release();
+      return parentCategoryResult;
+    } catch (error) {
+      console.log(error);
+      return errResponse(baseResponse.DB_ERROR);
+    }
+};
+
+// 
+exports.getLikeProductStatus = async function (userIdx) {
+    try {
+      const connection = await pool.getConnection(async (conn) => conn);
+      const LikeProductStatusResult = await productDao.likeProductStatus(connection, userIdx);
+      connection.release();
+      return LikeProductStatusResult;
+    } catch (error) {
+      console.log(error);
+      return errResponse(baseResponse.DB_ERROR);
+    }
+}
