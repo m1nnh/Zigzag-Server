@@ -418,6 +418,46 @@ exports.getTimeSale = async function (req, res) {
     if (checkUserIdx[0].exist === 0)
         return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
 
+    if (!page)
+        return res.send(response(baseResponse.PAGE_EMPTY)); // 2012 : page를 입력해주세요.
+    
+    if (!regPage.test(page) & page < 1) // 2013 : page 번호를 확인해주세요.
+        return res.send(response(baseResponse.PAGE_ERROR_TYPE));
+
+    if (!size) // 2014 : size를 입력해주세요.
+        return res.send(response(baseResponse.SIZE_EMPTY));
+
+    if (!regSize.test(size) & size < 1) // 2015 : size 번호를 확인해주세요.
+        return res.send(response(baseResponse.SIZE_ERROR_TYPE));
+
+    page = size * (page-1);
+
+    // Time Sale Product Result
+    let timeSaleProductResult = await productProvider.timeSaleProduct(page, size);
+
+    // Status Result
+    let getLikeProductStatus = await productProvider.likeProductStatus(userIdx);
+
+    // Time Sale Product Result <- Status
+    for (var i = 0; i < timeSaleProductResult.length; i++) {
+        
+        var flag = 0;
+        
+        for (var j = 0; j < getLikeProductStatus.length; j++) {
+            
+            if (timeSaleProductResult[i].productIdx === getLikeProductStatus[j].productIdx) {
+                timeSaleProductResult[i]["likeProductStatus"] = getLikeProductStatus[j].status;
+                flag = 1;
+                break;
+            }
+        }
+
+        // Home Product Result 'N' Insert
+        if (flag === 0)
+        timeSaleProductResult[i]["likeProductStatus"] = 'N';
+    }
+    
+    return res.send(response(baseResponse.SUCCESS, timeSaleProductResult));
 }
 
 
