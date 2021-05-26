@@ -110,7 +110,7 @@ exports.loginUser = async function (req, res) {
     const emailCheckResult = await userProvider.emailCheck(email);
 
     if (emailCheckResult[0].exist === 0)
-        return res.send(response(baseResponse.SIGNIN_EMAIL_WRONG)); // 2023 : 해당 이메일이 존재하지 않습니다.
+        return res.send(response(baseResponse.EMAIL_NOT_EMPTY)); // 2023 : 해당 이메일이 존재하지 않습니다.
     
     // Result
     const loginResult = await userService.postSignIn(email, password);

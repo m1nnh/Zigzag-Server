@@ -1,7 +1,9 @@
+const { response } = require("express");
 const { pool } = require("../../../config/database");
 const { logger } = require("../../../config/winston");
-
+const {errResponse} = require("../../../config/response");
 const productDao = require("./productDao");
+const baseResponse = require("../../../config/baseResponseStatus");
 
 // User Check
 exports.userCheck = async function (userIdx) {
@@ -10,6 +12,15 @@ exports.userCheck = async function (userIdx) {
   connection.release();
 
   return userCheckResult;
+};
+
+// ProductIdx Check
+exports.productIdxCheck = async function (productIdx) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const productIdxCheckResult = await productDao.selectProductIdx(connection, productIdx);
+  connection.release();
+
+  return productIdxCheckResult;
 };
 
 // Get Home Product
@@ -33,9 +44,9 @@ exports.likeProductStatus = async function (userIdx) {
 };
 
 // Get Brand Product
-exports.brandProduct = async function (page, size) {
+exports.brandProduct = async function (page, size, brandIdx) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const brandProductResult = await productDao.selectBrandProduct(connection, [page, size]);
+  const brandProductResult = await productDao.selectBrandProduct(connection, [page, size, brandIdx]);
 
   connection.release();
 
@@ -131,3 +142,102 @@ exports.newProduct = async function (page, size) {
 
   return newProductResult;
 };
+
+// Get Product Intro
+exports.productIntro = async function (productIdx, userIdx) {
+  
+  var productIntro;
+  var ca = [];
+  var cl = [];
+
+
+  // Transaction
+  try {
+    const connection = await pool.getConnection(async (conn) => conn);
+    try {
+      
+      // Get Image
+      var productImage = await productDao.selectProductImage(connection, productIdx);
+      
+      // Get Product Intro
+      productIntro = await productDao.selectProductIntro(connection, productIdx);
+      
+      // Get Bookmark Status
+      const bookmarkStatus = await productDao.selectStoreStatus(connection, userIdx);
+      const storeIdx = productIntro[0].storeIdx;
+
+      // Get StoreInfo
+      storeInfo = await productDao.selectStoreInfo(connection, storeIdx);
+      
+      // Get First Category Reference List
+      const firstCategoryRefList = await productDao.selectFirstCategoryList(connection, storeIdx);
+      
+      // productIntro <- Image Insert
+      productIntro[0]["productImage"] = productImage;
+
+      // productIntro <- storeInfo Insert
+      productIntro[1] = storeInfo[0]
+
+      // productIntor <- bookmarkStatus Insert
+      if (!bookmarkStatus)
+        productIntro[1]["bookmarkStatus"] = 'N';
+      else
+        productIntro[1]["bookmarkStatus"] = bookmarkStatus[0].status;
+
+      // Get Second CategoryIdx 
+      for (var i = 0; i < firstCategoryRefList.length; i++) {
+        result = await productDao.selectSecondCategoryList(connection, firstCategoryRefList[i].categoryRef);
+        ca.push(result);
+      }
+      
+      // Get Last CategoryIdx, CategoryName
+      for (var i = 0; i < ca.length; i++) {
+        const result = await productDao.selectLastCategoryList(connection, ca[i][0].categoryRef);
+        var flag = 0
+        if (cl.length !== 0)  {
+
+          for (var j = 0; j < cl.length; j++) {
+              if (result[0].categoryIdx === cl[j][0].categoryIdx)
+                {
+                  flag = 1;
+                  break;
+                }
+            }  
+          }
+
+        if (flag === 1)
+            continue;
+        else
+          cl.push(result);
+
+      }
+
+      // Array
+      productIntro[1]["categoryList"] = cl[0];
+
+      // productIntro <- CategoryIdx, CategoryName Insert
+      for (var i = 1; i < cl.length; i++)
+        productIntro[1]["categoryList"].push(cl[i][0]);
+
+      // Insert Readcount
+      await productDao.insertReadCount(connection, [productIdx, userIdx]);
+
+      connection.commit();
+      connection.release();
+    }
+    catch (err) {
+
+      connection.rollback();
+      connection.release();
+      logger.error(`App - getProductIntro Transaction error\n: ${err.message}`);
+      return errResponse(baseResponse.DB_ERROR);
+    }
+  } catch (err) {
+
+    logger.error(`App - getProductIntro Transaction error\n: ${err.message}`);
+    return errResponse(baseResponse.DB_ERROR);
+  }
+  
+
+  return productIntro;
+}

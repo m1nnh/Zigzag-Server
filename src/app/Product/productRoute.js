@@ -25,5 +25,9 @@ module.exports = function(app){
 
     // API No. ? 신상품 조회 API
     app.get('/products/new', jwtMiddleware, product.getNew);
+
+    // API No. ? 상품 인트로 조회 API
+    app.get('/products/:productIdx/intro', jwtMiddleware, product.getProductIntro);
+                 
     
 };

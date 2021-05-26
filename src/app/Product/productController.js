@@ -10,6 +10,7 @@ const {emit} = require("nodemon");
 
 const regPage = /^[0-9]/g;
 const regSize = /^[0-9]/g;
+const regNum = /^[0-9]/g;
 
 /**
  * API No. 
@@ -98,6 +99,8 @@ exports.getBrand = async function (req, res) {
     // Request Body
     const bodyIdx = req.body;
 
+    let brandIdx = Math.floor(Math.random() * 10) + 1;
+
     // Validation Check (Request Error)
     if (!userIdx | !bodyIdx) 
         return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
@@ -125,7 +128,7 @@ exports.getBrand = async function (req, res) {
     page = size * (page-1);
 
     // Brand Product Result
-    let brandResult = await productProvider.brandProduct(page, size);
+    let brandResult = await productProvider.brandProduct(page, size, brandIdx);
 
     // Status Result
     let getLikeProductStatus = await productProvider.likeProductStatus(userIdx);
@@ -692,5 +695,46 @@ exports.getNew = async function (req, res) {
     }
     
     return res.send(response(baseResponse.SUCCESS, newProductResult));
+
+ }
+
+ /**
+ * API No. 
+ * API Name : 상품 인트로 조회 API
+ * [GET] /products/:productIdx
+ */
+
+ exports.getProductIntro = async function(req, res) {
+
+    // Request Token
+    const userIdx = req.verifiedToken.userIdx;
+
+    // Request Path Variable
+    const {productIdx} = req.params;
+
+    // Request Body
+    const bodyIdx = req.body;
+
+    // Validation Check (Request Error)
+    if (!userIdx | !bodyIdx) 
+        return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
+
+    if (userIdx !== parseInt(bodyIdx.bodyIdx))
+        return res.send(errResponse(baseResponse.ID_NOT_MATCHING)); // 2020 : userId가 다릅니다.
+
+    const checkUserIdx = await productProvider.userCheck(userIdx);
+
+    if (checkUserIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
+
+    const checkProductIdx = await productProvider.productIdxCheck(productIdx);
+
+    if (checkProductIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.PRODUCTIDX_NOT_EXIST)) // 2026 : 존재하지 않는 상품입니다.
+
+    // Intro Result
+    const productIntroResult = await productProvider.productIntro(productIdx, userIdx)
+    
+    return res.send(response(baseResponse.SUCCESS, productIntroResult));
 
  }
