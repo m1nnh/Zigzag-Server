@@ -30,19 +30,11 @@ async function selectHomeProduct(connection, [page, size]) {
               then '무료배송'
           else
                   '' end as deliveryPrice,
-<<<<<<< HEAD
       case
           when p.brandIdx is null
               then ''
           else
               '브랜드' end                   as brandStatus
-=======
-                  case
-           when p.brandIdx is null
-               then ''
-           else
-               '브랜드' end                   as brandStatus
->>>>>>> dev1
     from Product p
         left join Store s on s.storeIdx = p.storeIdx
     order by rand()
@@ -327,8 +319,44 @@ async function selectNewSaleProduct(connection, [page, size, condition]) {
   return newSaleProductRow;
 }
 
-<<<<<<< HEAD
+// Get New  Product
+async function selectNewProduct(connection, [page, size]) {
 
+  const newProductQuery = `
+    select p.storeIdx,
+    p.productIdx,
+    thumbnailUrl,
+    zFlag,
+    s.storeName,
+    productContents,
+    case
+        when productSale > 0 and zSaleFlag = 'N'
+            then concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
+        when productSale > 0 and zSaleFlag = 'Y'
+            then concat('제트할인가 ', productPrice, '\n', productSale, '% ',
+                        format(productPrice * ((100 - productSale) / 100), 0))
+        else
+            format(productPrice, 0) end as resultPrice,
+    case
+        when s.deliveryPrice = 0
+            then '무료배송'
+        else
+            '' end                      as deliveryPrice,
+    case
+        when p.brandIdx is null
+            then ''
+        else
+            '브랜드' end                   as brandStatus
+    from Product p
+        left join Store s on s.storeIdx = p.storeIdx
+    where timestampdiff(day, p.createdAt, CURRENT_TIMESTAMP()) < 7
+    limit ` + page + `, ` + size + `;
+  `;
+
+  const [newProductRow] = await connection.query(newProductQuery, [page, size]);
+  
+  return newProductRow;
+}
 
 // 여기서부터 토미
 
@@ -421,56 +449,6 @@ async function detailCategoryRef(connection, categoryIdx, where, order, page, si
 
 
 
-
-
-
-
-
-
-
-
-
-=======
-// Get New  Product
-async function selectNewProduct(connection, [page, size]) {
-
-  const newProductQuery = `
-    select p.storeIdx,
-    p.productIdx,
-    thumbnailUrl,
-    zFlag,
-    s.storeName,
-    productContents,
-    case
-        when productSale > 0 and zSaleFlag = 'N'
-            then concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
-        when productSale > 0 and zSaleFlag = 'Y'
-            then concat('제트할인가 ', productPrice, '\n', productSale, '% ',
-                        format(productPrice * ((100 - productSale) / 100), 0))
-        else
-            format(productPrice, 0) end as resultPrice,
-    case
-        when s.deliveryPrice = 0
-            then '무료배송'
-        else
-            '' end                      as deliveryPrice,
-    case
-        when p.brandIdx is null
-            then ''
-        else
-            '브랜드' end                   as brandStatus
-    from Product p
-        left join Store s on s.storeIdx = p.storeIdx
-    where timestampdiff(day, p.createdAt, CURRENT_TIMESTAMP()) < 7
-    limit ` + page + `, ` + size + `;
-  `;
-
-  const [newProductRow] = await connection.query(newProductQuery, [page, size]);
-  
-  return newProductRow;
-}
-
->>>>>>> dev1
 module.exports = {
     selectHomeProduct,
     selectLikeProductStatus,
@@ -481,7 +459,10 @@ module.exports = {
     selectBookMarkStatus,
     selectRankBrandProduct,
     selectBestProduct,
-
+    selectTimeSaleProduct,
+    selectSaleProduct,
+    selectNewSaleProduct,
+    selectNewProduct,
 
 
 
@@ -492,10 +473,6 @@ module.exports = {
     childCategory,
     likeProductStatus,
     detailCategoryIdx,
-    detailCategoryRef,
-    selectTimeSaleProduct,
-    selectSaleProduct,
-    selectNewSaleProduct,
-    selectNewProduct
+    detailCategoryRef
   };
   

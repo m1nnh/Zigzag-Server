@@ -585,7 +585,6 @@ exports.getNewSale = async function (req, res) {
             const last = categoryIdxRow[categoryIdxRow.length - 1].categoryIdx;
 
             condition = 'and c.categoryRef between ' + first + ' and ' + last;
-            console.log(condition);
         }
         else 
             return res.send(errResponse(baseResponse.LARGE_ERROR_TYPE)); // 2024 : large 번호를 확인해주세요. 
