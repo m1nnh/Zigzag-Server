@@ -92,7 +92,45 @@ exports.bestProduct = async function (page, size, condition, agecondition) {
   return bestProductResult;
 };
 
+// Get Time Sale Product
+exports.timeSaleProduct = async function (page, size) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const timeSaleProductResult = await productDao.selectTimeSaleProduct(connection, [page, size]);
 
+  connection.release();
+
+  return timeSaleProductResult;
+};
+
+// Get Sale Product
+exports.saleProduct = async function (condition) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const saleProductResult = await productDao.selectSaleProduct(connection, condition);
+
+  connection.release();
+
+  return saleProductResult;
+};
+
+// Get New Sale Product
+exports.newSaleProduct = async function (page, size, condition) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const newSaleProductResult = await productDao.selectNewSaleProduct(connection, [page, size, condition]);
+
+  connection.release();
+
+  return newSaleProductResult;
+};
+
+// Get New Product
+exports.newProduct = async function (page, size) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const newProductResult = await productDao.selectNewProduct(connection, [page, size]);
+
+  connection.release();
+
+  return newProductResult;
+};
 
 
 
@@ -160,32 +198,4 @@ exports.getLikeProductStatus = async function (userIdx) {
       return errResponse(baseResponse.DB_ERROR);
     }
 }
-// Get Time Sale Product
-exports.timeSaleProduct = async function (page, size) {
-  const connection = await pool.getConnection(async (conn) => conn);
-  const timeSaleProductResult = await productDao.selectTimeSaleProduct(connection, [page, size]);
 
-  connection.release();
-
-  return timeSaleProductResult;
-};
-
-// Get Sale Product
-exports.saleProduct = async function (condition) {
-  const connection = await pool.getConnection(async (conn) => conn);
-  const saleProductResult = await productDao.selectSaleProduct(connection, condition);
-
-  connection.release();
-
-  return saleProductResult;
-};
-
-// Get New Sale Product
-exports.newSaleProduct = async function (page, size, condition) {
-  const connection = await pool.getConnection(async (conn) => conn);
-  const newSaleProductResult = await productDao.selectNewSaleProduct(connection, [page, size, condition]);
-
-  connection.release();
-
-  return newSaleProductResult;
-};
