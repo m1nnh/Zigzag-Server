@@ -164,7 +164,7 @@ exports.getBrandRank = async function (req, res) {
     const userIdx = req.verifiedToken.userIdx;
 
     // Request Query String
-    let filter = req.query;
+    var {large} = req.query;
 
     // Request Body
     const bodyIdx = req.body;
@@ -183,16 +183,71 @@ exports.getBrandRank = async function (req, res) {
     if (checkUserIdx[0].exist === 0)
         return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
 
+
     // Category Filtering
-    switch (filter) {
-        case '1' : condition += 'where c.categoryRef between 1 and 5'; break;
-        case '2' : condition += 'where c.categoryRef = 7'; break;
-        case '3' : condition += 'where c.categoryRef = 6'; break;
-        case '4' : condition += 'where c.categoryRef = 11'; break;
-        case '5' : condition += 'where c.categoryRef = 8'; break;
-        case '6' : condition += 'where c.categoryRef = 9'; break;
-        default : break;
+    if (large) {
+        if (large == 1) {
+            large = parseInt(large) + 1
+            var firstCategoryIdxRow = await productProvider.categoryIdx(large);
+            large = parseInt(large) + 5
+            let first = firstCategoryIdxRow[1].categoryIdx;
+
+            var secondCategoryIdxRow = await productProvider.categoryIdx(large);
+            let last = secondCategoryIdxRow[secondCategoryIdxRow.length - 1].categoryIdx;
+
+            condition = 'where categoryRef between ' + first + ' and ' + last;
+        }
+
+        else if (large == 2) {
+            large = parseInt(large) + 6
+            var categoryIdxRow = await productProvider.categoryIdx(large);
+            let first = categoryIdxRow[1].categoryIdx;
+            let last = categoryIdxRow[categoryIdxRow.length - 1].categoryIdx;
+
+            condition = 'where categoryRef between ' + first + ' and ' + last;
+        }
+
+        else if (large == 3) {
+            large = parseInt(large) + 4
+            var categoryIdxRow = await productProvider.categoryIdx(large);
+            let first = categoryIdxRow[1].categoryIdx;
+            let last = categoryIdxRow[categoryIdxRow.length - 1].categoryIdx;
+
+            condition = 'where categoryRef between ' + first + ' and ' + last;
+        }
+
+        else if (large == 4) {
+            large = parseInt(large) + 8
+            var categoryIdxRow = await productProvider.categoryIdx(large);
+            let first = categoryIdxRow[1].categoryIdx;
+            let last = categoryIdxRow[categoryIdxRow.length - 1].categoryIdx;
+
+            condition = 'where categoryRef between ' + first + ' and ' + last;
+        }
+
+        else if (large == 5) {
+            large = parseInt(large) + 4
+            var categoryIdxRow = await productProvider.categoryIdx(large);
+            let first = categoryIdxRow[1].categoryIdx;
+            let last = categoryIdxRow[categoryIdxRow.length - 1].categoryIdx;
+
+            condition = 'where categoryRef between ' + first + ' and ' + last;
+        }
+
+        else if (large == 6) {
+            large = parseInt(large) + 4
+            var categoryIdxRow = await productProvider.categoryIdx(large);
+            let first = categoryIdxRow[1].categoryIdx;
+            let last = categoryIdxRow[categoryIdxRow.length - 1].categoryIdx;
+
+            condition = 'where categoryRef between ' + first + ' and ' + last;
+        }
+
+        else 
+            return res.send(errResponse(baseResponse.LARGE_ERROR_TYPE)); // 2024 : large 번호를 확인해주세요.
     }
+    else
+        condition = ''
 
     // Rank Result
     var rankResult = await productProvider.brandRank(condition);
@@ -244,7 +299,7 @@ exports.getBest = async function (req, res) {
     const userIdx = req.verifiedToken.userIdx;
 
     // Request Query String
-    let {page, size, filter, agefilter} = req.query;
+    let {page, size, large, agefilter} = req.query;
     
     // Request Body
     const bodyIdx = req.body;
@@ -277,22 +332,21 @@ exports.getBest = async function (req, res) {
         return res.send(response(baseResponse.SIZE_ERROR_TYPE));
     
     // Category Filtering
-    switch (filter) {
-        case '1' : condition += 'where c.categoryRef = 1'; break;
-        case '2' : condition += 'where c.categoryRef = 2'; break;
-        case '3' : condition += 'where c.categoryRef = 3'; break;
-        case '4' : condition += 'where c.categoryRef = 4'; break;
-        case '5' : condition += 'where c.categoryRef = 5'; break;
-        case '6' : condition += 'where c.categoryRef = 6'; break;
-        case '7' : condition += 'where c.categoryRef = 7'; break;
-        case '8' : condition += 'where c.categoryRef = 8'; break;
-        case '9' : condition += 'where c.categoryRef = 9'; break;
-        case '10' : condition += 'where c.categoryRef = 10'; break;
-        case '11' : condition += 'where c.categoryRef = 11'; break;
-        case '12' : condition += 'where c.categoryRef = 12'; break;
-        case '13' : condition += 'where c.categoryRef = 13'; break;
-        default : break;
+    if (large) {
+        if (large > 0 & large < 15)
+        {
+            large = parseInt(large) + 1
+            const categoryIdxRow = await productProvider.categoryIdx(large);
+            const first = categoryIdxRow[1].categoryIdx;
+            const last = categoryIdxRow[categoryIdxRow.length - 1].categoryIdx;
+
+            condition = 'where categoryRef between ' + first + ' and ' + last;
+        }
+        else 
+            return res.send(errResponse(baseResponse.LARGE_ERROR_TYPE)); // 2024 : large 번호를 확인해주세요. 
     }
+    else
+        condition = ''
 
     // Not Category Filtering
     if (!condition) 
@@ -334,10 +388,199 @@ exports.getBest = async function (req, res) {
     }
     
     return res.send(response(baseResponse.SUCCESS, bestResult));
+}
+
+/**
+ * API No. 
+ * API Name : 타임특가 상품 조회 API
+ * [GET] /products/time-sale
+ */
+exports.getTimeSale = async function (req, res) {
+
+    // Request Token
+    const userIdx = req.verifiedToken.userIdx;
+
+    // Request Query String
+    let {page, size} = req.query;
+    
+    // Request Body
+    const bodyIdx = req.body;
+    
+    // Validation Check (Request Error)
+    if (!userIdx | !bodyIdx) 
+        return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
+
+    if (userIdx !== parseInt(bodyIdx.bodyIdx))
+        return res.send(errResponse(baseResponse.ID_NOT_MATCHING)); // 2020 : userId가 다릅니다.
+
+    const checkUserIdx = await productProvider.userCheck(userIdx);
+
+    if (checkUserIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
 
 }
 
 
+/**
+ * API No. 
+ * API Name : 혜택 상품 조회 API
+ * [GET] /products/sale
+ */
+exports.getSale = async function (req, res) {
+
+    // Request Token
+    const userIdx = req.verifiedToken.userIdx;
+
+    // Request Query String
+    let {categoryRef} = req.query;
+
+    // Request Body
+    const bodyIdx = req.body;
+
+    let condition = '';
+    let saleProductResult;
+
+    // Validation Check (Request Error)
+    if (!userIdx | !bodyIdx) 
+        return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
+
+    if (userIdx !== parseInt(bodyIdx.bodyIdx))
+        return res.send(errResponse(baseResponse.ID_NOT_MATCHING)); // 2020 : userId가 다릅니다.
+
+    const checkUserIdx = await productProvider.userCheck(userIdx);
+
+    if (checkUserIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
+
+    if (categoryRef != 1 & (categoryRef < 15 | categoryRef > 104))
+        return res.send(errResponse(baseResponse.CATEGORYREF_ERROR_TYPE)); // 2025 : categoryRef 번호를 확인해주세요.
+    
+    // sale Product Result
+    if (categoryRef == 1) {
+        condition += ' and s.deliveryPrice = 0'
+        saleProductResult = await productProvider.saleProduct(condition);
+    }
+    else {
+        condition += ' and c.categoryRef = ' + categoryRef;
+        saleProductResult = await productProvider.saleProduct(condition);
+        
+    }
+    
+    // Status Result
+    let getLikeProductStatus = await productProvider.likeProductStatus(userIdx);
+
+    // sale Product Result <- Status
+    for (var i = 0; i < saleProductResult.length; i++) {
+        
+        var flag = 0;
+        
+        for (var j = 0; j < getLikeProductStatus.length; j++) {
+            
+            if (saleProductResult[i].productIdx === getLikeProductStatus[j].productIdx) {
+                saleProductResult[i]["likeProductStatus"] = getLikeProductStatus[j].status;
+                flag = 1;
+                break;
+            }
+        }
+
+        // sale Product Result 'N' Insert
+        if (flag === 0)
+        saleProductResult[i]["likeProductStatus"] = 'N';
+    }
+    
+    return res.send(response(baseResponse.SUCCESS, saleProductResult));
+
+ }
+
+ /**
+ * API No. 
+ * API Name : 신상/혜택 상품 조회 API
+ * [GET] /products/new-sale
+ */
+exports.getNewSale = async function (req, res) {
+
+    // Request Token
+    const userIdx = req.verifiedToken.userIdx;
+
+    // Request Query String
+    let {page, size, large} = req.query;
+    
+    // Request Body
+    const bodyIdx = req.body;
+
+    let condition = ''
+
+    // Validation Check (Request Error)
+    if (!userIdx | !bodyIdx) 
+        return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
+
+    if (userIdx !== parseInt(bodyIdx.bodyIdx))
+        return res.send(errResponse(baseResponse.ID_NOT_MATCHING)); // 2020 : userId가 다릅니다.
+
+    const checkUserIdx = await productProvider.userCheck(userIdx);
+
+    if (checkUserIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
+
+    if (!page)
+        return res.send(response(baseResponse.PAGE_EMPTY)); // 2012 : page를 입력해주세요.
+    
+    if (!regPage.test(page) & page < 1) // 2013 : page 번호를 확인해주세요.
+        return res.send(response(baseResponse.PAGE_ERROR_TYPE));
+
+    if (!size) // 2014 : size를 입력해주세요.
+        return res.send(response(baseResponse.SIZE_EMPTY));
+
+    if (!regSize.test(size) & size < 1) // 2015 : size 번호를 확인해주세요.
+        return res.send(response(baseResponse.SIZE_ERROR_TYPE));
+    
+    // Category Filtering
+    if (large) {
+        if (large > 0 & large < 15)
+        {
+            large = parseInt(large) + 1
+            const categoryIdxRow = await productProvider.categoryIdx(large);
+            const first = categoryIdxRow[1].categoryIdx;
+            const last = categoryIdxRow[categoryIdxRow.length - 1].categoryIdx;
+
+            condition = 'and c.categoryRef between ' + first + ' and ' + last;
+            console.log(condition);
+        }
+        else 
+            return res.send(errResponse(baseResponse.LARGE_ERROR_TYPE)); // 2024 : large 번호를 확인해주세요. 
+    }
+    else
+        condition = ''
+
+    page = size * (page-1);
+
+    // New Sale Product Result
+    const newSaleProductResult = await productProvider.newSaleProduct(page, size, condition);
+
+    // Status Result
+    let getLikeProductStatus = await productProvider.likeProductStatus(userIdx);
+
+    // Best Product Result <- Status
+    for (var i = 0; i < newSaleProductResult.length; i++) {
+        
+        var flag = 0;
+        
+        for (var j = 0; j < getLikeProductStatus.length; j++) {
+            
+            if (newSaleProductResult[i].productIdx === getLikeProductStatus[j].productIdx) {
+                newSaleProductResult[i]["likeProductStatus"] = getLikeProductStatus[j].status;
+                flag = 1;
+                break;
+            }
+        }
+
+        // Best Product 'N' Insert
+        if (flag === 0)
+            newSaleProductResult[i]["likeProductStatus"] = 'N';
+    }
+    
+    return res.send(response(baseResponse.SUCCESS, newSaleProductResult));
+}
 
 
 
@@ -432,24 +675,6 @@ exports.category = async function(req, res) {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Like Status 
 isLikeProduct = async function(productResult, likeStatusResult) {
     for (var i = 0; i < productResult.length; i++) {
@@ -457,13 +682,47 @@ isLikeProduct = async function(productResult, likeStatusResult) {
         for (var j = 0; j < likeStatusResult.length; j++) {
             if (productResult[i].productIdx === likeStatusResult[j].productIdx) {
                 productResult[i]["likeProductStatus"] = likeStatusResult[j].status;
+            }
+        }
+    }
+    if (!page)
+        return res.send(response(baseResponse.PAGE_EMPTY)); // 2012 : page를 입력해주세요.
+    
+    if (!regPage.test(page) & page < 1) // 2013 : page 번호를 확인해주세요.
+        return res.send(response(baseResponse.PAGE_ERROR_TYPE));
+
+    if (!size) // 2014 : size를 입력해주세요.
+        return res.send(response(baseResponse.SIZE_EMPTY));
+
+    if (!regSize.test(size) & size < 1) // 2015 : size 번호를 확인해주세요.
+        return res.send(response(baseResponse.SIZE_ERROR_TYPE));
+
+    page = size * (page-1);
+
+    // Time Sale Product Result
+    let timeSaleProductResult = await productProvider.timeSaleProduct(page, size);
+
+    // Status Result
+    let getLikeProductStatus = await productProvider.likeProductStatus(userIdx);
+
+    // Time Sale Product Result <- Status
+    for (var i = 0; i < timeSaleProductResult.length; i++) {
+        
+        var flag = 0;
+        
+        for (var j = 0; j < getLikeProductStatus.length; j++) {
+            
+            if (timeSaleProductResult[i].productIdx === getLikeProductStatus[j].productIdx) {
+                timeSaleProductResult[i]["likeProductStatus"] = getLikeProductStatus[j].status;
                 flag = 1;
                 break;
             }
         }
+
         // Home Product Result 'N' Insert
         if (flag === 0)
-        productResult[i]["likeProductStatus"] = 'N';
+        timeSaleProductResult[i]["likeProductStatus"] = 'N';
     }
-    return productResult
+    
+    return res.send(response(baseResponse.SUCCESS, timeSaleProductResult));
 }
