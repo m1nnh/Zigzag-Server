@@ -1,10 +1,19 @@
-// UserIdx Check
+// userIdx Check
 async function selectUserIdx(connection, userIdx) {
   const userIdxQuery = `
     select exists(select userIdx from User where userIdx = ?) as exist;
      `;
   const [userIdxRow] = await connection.query(userIdxQuery, userIdx);
   return userIdxRow;
+}
+
+// productIdx Check
+async function selectProductIdx(connection, productIdx) {
+  const productIdxQuery = `
+    select exists(select productIdx from Product where productIdx = ?) as exist;
+     `;
+  const [productIdxRow] = await connection.query(productIdxQuery, productIdx);
+  return productIdxRow;
 }
 
 
@@ -61,11 +70,12 @@ async function selectLikeProductStatus(connection, userIdx) {
 }
 
 // Get Brand Product
-async function selectBrandProduct(connection, [page, size]) {
+async function selectBrandProduct(connection, [page, size, brandIdx]) {
 
   const brandProductQuery = `
     select p.storeIdx,
        p.productIdx,
+       p.brandIdx,
        thumbnailUrl,
        zFlag,
        b.brandName,
@@ -88,11 +98,12 @@ async function selectBrandProduct(connection, [page, size]) {
          left join Store s on s.storeIdx = p.storeIdx
          left join LikeProduct lp on lp.productIdx = p.productIdx
          left join Brand b on b.brandIdx = p.brandIdx
+  where p.brandIdx = ?
   order by rand()
   limit ` + page + `, ` + size + `;
   `;
     
-  const [brandProductRow] = await connection.query(brandProductQuery, [page, size]);
+  const [brandProductRow] = await connection.query(brandProductQuery, [brandIdx, page, size]);
   
   return brandProductRow;
 }
@@ -319,7 +330,7 @@ async function selectNewSaleProduct(connection, [page, size, condition]) {
   return newSaleProductRow;
 }
 
-// Get New  Product
+// Get New Product
 async function selectNewProduct(connection, [page, size]) {
 
   const newProductQuery = `
@@ -356,6 +367,141 @@ async function selectNewProduct(connection, [page, size]) {
   const [newProductRow] = await connection.query(newProductQuery, [page, size]);
   
   return newProductRow;
+}
+
+
+// Get Product Image
+async function selectProductImage(connection, productIdx) {
+
+  const productImageQuery = `
+    select productImage
+    from Product p
+    left join ProductImage pi on p.productIdx = pi.productIdx
+    where p.productIdx = ?;
+  `;
+
+  const [productImageRow] = await connection.query(productImageQuery, productIdx);
+  
+  return productImageRow;
+}
+
+// Get Product Intro
+async function selectProductIntro(connection, productIdx) {
+
+  const productIntroQuery = `
+    select s.storeIdx, p.productIdx, zFlag, productContents, ifnull(sum(r.score) / count(r.reviewIdx), 0) as score, count(r.reviewIdx) as reviewCount,
+    case
+        when productSale > 0 and zSaleFlag = 'N'
+            then concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
+        when productSale > 0 and zSaleFlag = 'Y'
+            then concat('제트할인가\n', productSale, '% ',
+                        format(productPrice * ((100 - productSale) / 100), 0), '  ',  p.productPrice)
+        else
+            format(productPrice, 0) end as resultPrice,
+    s.productPayInfo,
+    case
+        when 8 < date_format(now(), '%H') and date_format(now(), '%H') < 21
+            then concat('내일 도착 예정')
+      else
+            concat('내일 모레 도착 예정') end as productReceiptDay,
+    case
+        when s.deliveryPrice = 0
+            then '조건 없이 무료'
+        else
+            s.deliveryPrice end                      as deliveryPrice,
+    s.deliveryInfo, s.reInfo
+
+    from Product p
+      left join Review r on r.productIdx = p.productIdx
+      left join Store s on s.storeIdx = p.storeIdx
+    where p.productIdx = ?;
+  `;
+
+  const [productIntroRow] = await connection.query(productIntroQuery, productIdx);
+  
+  return productIntroRow;
+}
+
+// Insert ReadCount
+async function insertReadCount(connection, [productIdx, userIdx]) {
+
+  const insertReadCountQuery = `
+    insert into ReadCount(productIdx, userIdx) VALUES (?, ?);
+  `;
+
+  const [insertReadRow] = await connection.query(insertReadCountQuery, [productIdx, userIdx]);
+  
+  return insertReadRow;
+}
+
+// Get Store Info
+async function selectStoreInfo(connection, storeIdx) {
+
+  const storeInfoQuery = `
+  select storeUrl, storeName, count(b.storeIdx) as bookmarkCount
+  from Store s
+           left join Bookmark b on s.storeIdx = b.storeIdx
+  where s.storeIdx = ?;
+  `;
+  const [storeInfoRow] = await connection.query(storeInfoQuery, storeIdx);
+
+  return storeInfoRow;
+}
+
+// Get BookMark Store Status
+async function selectStoreStatus(connection, userIdx) {
+
+  const bookMarkStatusQuery = `
+    select s.storeIdx, bm.status
+    from Store s
+    left join Bookmark bm on bm.storeIdx = s.storeIdx
+    where bm.userIdx = ?;
+    `;
+  const [bookMarkStatusRow] = await connection.query(bookMarkStatusQuery, userIdx);
+  
+  return bookMarkStatusRow;
+}
+
+// Get First Category Reference  List
+async function selectFirstCategoryList(connection, storeIdx) {
+
+  const categoryListQuery = `
+    select c.categoryRef
+    from Store s
+    left join Product p on p.storeIdx = s.storeIdx
+    left join Category c on p.categoryIdx = c.categoryIdx
+    where s.storeIdx = ?
+    group by c.categoryRef;
+    `;
+  const [categoryListRow] = await connection.query(categoryListQuery, storeIdx);
+  
+  return categoryListRow;
+}
+
+// Get Second Category Reference  List
+async function selectSecondCategoryList(connection, categoryRef) {
+
+  const categoryListQuery = `
+  select c.categoryRef
+  from Category c
+  where categoryIdx = ?;
+    `;
+  const [categoryListRow] = await connection.query(categoryListQuery, categoryRef);
+  
+  return categoryListRow;
+}
+
+// Get Last Category List
+async function selectLastCategoryList(connection, categoryRef) {
+
+  const categoryListQuery = `
+    select c.categoryIdx, c.categoryName
+    from Category c
+    where categoryIdx = ?;
+    `;
+  const [categoryListRow] = await connection.query(categoryListQuery, categoryRef);
+  console
+  return categoryListRow;
 }
 
 // 여기서부터 토미
@@ -448,11 +594,11 @@ async function detailCategoryRef(connection, categoryIdx, where, order, page, si
 
 
 
-
 module.exports = {
     selectHomeProduct,
     selectLikeProductStatus,
     selectUserIdx,
+    selectProductIdx,
     selectBrandProduct,
     selectCategoryIdx,
     selectBrandRank,
@@ -463,7 +609,14 @@ module.exports = {
     selectSaleProduct,
     selectNewSaleProduct,
     selectNewProduct,
-
+    selectProductImage,
+    selectProductIntro,
+    insertReadCount,
+    selectStoreInfo,
+    selectStoreStatus,
+    selectFirstCategoryList,
+    selectSecondCategoryList,
+    selectLastCategoryList,
 
 
 
@@ -474,5 +627,7 @@ module.exports = {
     likeProductStatus,
     detailCategoryIdx,
     detailCategoryRef
+
+    
   };
   

@@ -34,23 +34,8 @@ module.exports = {
     EMAIL_NOT_EMPTY : { "isSuccess": false, "code": 2023, "message": "해당 이메일이 존재하지 않습니다." },
     LARGE_ERROR_TYPE : { "isSuccess": false, "code": 2024, "message": "large 번호를 확인해주세요." },
     CATEGORYREF_ERROR_TYPE : { "isSuccess": false, "code": 2025, "message": "cateogoryRef 번호를 확인해주세요." },
+    PRODUCTIDX_NOT_EXIST : { "isSuccess": false, "code": 2026, "message": "존재하지 않는 상품입니다." },
 
-
-
-
-
-
-
-
-
-
-
-    PRODUCT_CATEGORYIDX_EMPTY : {"isSuccess": false, "code": 2100, "message": "categoryIdx를 입력해 주세요." },
-    PRODUCT_CATEGORYIDX_STYLE : {"isSuccess": false, "code": 2101, "message": "categoryIdx를 형식에 맞게 입력해 주세요." },
-    PRODUCT_PAGE_EMPTY : {"isSuccess": false, "code": 2102, "message": "page를 입력해 주세요." },
-    PRODUCT_PAGE_STYLE : {"isSuccess": false, "code": 2103, "message": "page를 형식에 맞게 입력해 주세요." },
-    PRODUCT_SIZE_EMPTY : {"isSuccess": false, "code": 2104, "message": "size를 입력해 주세요." },
-    PRODUCT_SIZE_STYLE : {"isSuccess": false, "code": 2105, "message": "size를 형식에 맞게 입력해 주세요." },
     // Response error
     SIGNUP_REDUNDANT_EMAIL : { "isSuccess": false, "code": 3001, "message":"중복된 이메일입니다." },
     SIGNUP_REDUNDANT_PHONENUM : { "isSuccess": false, "code": 3002, "message":"중복된 휴대폰 번호입니다." },

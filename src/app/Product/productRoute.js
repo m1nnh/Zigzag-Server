@@ -26,11 +26,13 @@ module.exports = function(app){
     // API No. ? 신상품 조회 API
     app.get('/products/new', jwtMiddleware, product.getNew);
 
+    // API No. ? 상품 인트로 조회 API
+    app.get('/products/:productIdx/intro', jwtMiddleware, product.getProductIntro);
 
     // 토미
     // API No ?. 모아보기 카테고리 조회 API
     app.get('/products/category', product.category);
     
-
+                 
     
 };
