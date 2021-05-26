@@ -121,3 +121,13 @@ exports.newSaleProduct = async function (page, size, condition) {
 
   return newSaleProductResult;
 };
+
+// Get New Product
+exports.newProduct = async function (page, size) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const newProductResult = await productDao.selectNewProduct(connection, [page, size]);
+
+  connection.release();
+
+  return newProductResult;
+};

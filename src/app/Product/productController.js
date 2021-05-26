@@ -42,19 +42,20 @@ const regSize = /^[0-9]/g;
     if (!page)
         return res.send(response(baseResponse.PAGE_EMPTY)); // 2012 : page를 입력해주세요.
     
-    if (!regPage.test(page) & page < 1) // 2013 : page 번호를 확인해주세요.
-        return res.send(response(baseResponse.PAGE_ERROR_TYPE));
+    if (!regPage.test(page) & page < 1) 
+        return res.send(response(baseResponse.PAGE_ERROR_TYPE)); // 2013 : page 번호를 확인해주세요.
 
-    if (!size) // 2014 : size를 입력해주세요.
-        return res.send(response(baseResponse.SIZE_EMPTY));
+    if (!size) 
+        return res.send(response(baseResponse.SIZE_EMPTY)); // 2014 : size를 입력해주세요.
 
-    if (!regSize.test(size) & size < 1) // 2015 : size 번호를 확인해주세요.
-        return res.send(response(baseResponse.SIZE_ERROR_TYPE));
+    if (!regSize.test(size) & size < 1) 
+        return res.send(response(baseResponse.SIZE_ERROR_TYPE)); // 2015 : size 번호를 확인해주세요.
 
     page = size * (page-1);
 
     // Home Product Result
     let homeResult = await productProvider.homeProduct(page, size);
+
     // Status Result
     let getLikeProductStatus = await productProvider.likeProductStatus(userIdx);
 
@@ -112,14 +113,14 @@ exports.getBrand = async function (req, res) {
     if (!page)
         return res.send(response(baseResponse.PAGE_EMPTY)); // 2012 : page를 입력해주세요.
     
-    if (!regPage.test(page) & page < 1) // 2013 : page 번호를 확인해주세요.
-        return res.send(response(baseResponse.PAGE_ERROR_TYPE));
+    if (!regPage.test(page) & page < 1) 
+        return res.send(response(baseResponse.PAGE_ERROR_TYPE)); // 2013 : page 번호를 확인해주세요.
 
-    if (!size) // 2014 : size를 입력해주세요.
-        return res.send(response(baseResponse.SIZE_EMPTY));
+    if (!size) 
+        return res.send(response(baseResponse.SIZE_EMPTY)); // 2014 : size를 입력해주세요.
 
-    if (!regSize.test(size) & size < 1) // 2015 : size 번호를 확인해주세요.
-        return res.send(response(baseResponse.SIZE_ERROR_TYPE));
+    if (!regSize.test(size) & size < 1) 
+        return res.send(response(baseResponse.SIZE_ERROR_TYPE)); // 2015 : size 번호를 확인해주세요.
     
     page = size * (page-1);
 
@@ -154,7 +155,7 @@ exports.getBrand = async function (req, res) {
 
  /**
  * API No. 
- * API Name : 브랜드 상품 랭킹 조회 API
+ * API Name : 랭킹별 브랜드 상품 조회 API
  * [GET] /products/brand/rank
  */
 exports.getBrandRank = async function (req, res) {
@@ -321,14 +322,14 @@ exports.getBest = async function (req, res) {
     if (!page)
         return res.send(response(baseResponse.PAGE_EMPTY)); // 2012 : page를 입력해주세요.
     
-    if (!regPage.test(page) & page < 1) // 2013 : page 번호를 확인해주세요.
-        return res.send(response(baseResponse.PAGE_ERROR_TYPE));
+    if (!regPage.test(page) & page < 1) 
+        return res.send(response(baseResponse.PAGE_ERROR_TYPE)); // 2013 : page 번호를 확인해주세요.
 
-    if (!size) // 2014 : size를 입력해주세요.
-        return res.send(response(baseResponse.SIZE_EMPTY));
+    if (!size) 
+        return res.send(response(baseResponse.SIZE_EMPTY)); // 2014 : size를 입력해주세요.
 
-    if (!regSize.test(size) & size < 1) // 2015 : size 번호를 확인해주세요.
-        return res.send(response(baseResponse.SIZE_ERROR_TYPE));
+    if (!regSize.test(size) & size < 1) 
+        return res.send(response(baseResponse.SIZE_ERROR_TYPE)); // 2015 : size 번호를 확인해주세요.
     
     // Category Filtering
     if (large) {
@@ -391,7 +392,7 @@ exports.getBest = async function (req, res) {
 
 /**
  * API No. 
- * API Name : 타임특가 상품 조회 API
+ * API Name : 타임 특가 상품 조회 API
  * [GET] /products/time-sale
  */
 exports.getTimeSale = async function (req, res) {
@@ -420,14 +421,14 @@ exports.getTimeSale = async function (req, res) {
     if (!page)
         return res.send(response(baseResponse.PAGE_EMPTY)); // 2012 : page를 입력해주세요.
     
-    if (!regPage.test(page) & page < 1) // 2013 : page 번호를 확인해주세요.
-        return res.send(response(baseResponse.PAGE_ERROR_TYPE));
+    if (!regPage.test(page) & page < 1) 
+        return res.send(response(baseResponse.PAGE_ERROR_TYPE)); // 2013 : page 번호를 확인해주세요.
 
-    if (!size) // 2014 : size를 입력해주세요.
-        return res.send(response(baseResponse.SIZE_EMPTY));
+    if (!size) 
+        return res.send(response(baseResponse.SIZE_EMPTY)); // 2014 : size를 입력해주세요.
 
-    if (!regSize.test(size) & size < 1) // 2015 : size 번호를 확인해주세요.
-        return res.send(response(baseResponse.SIZE_ERROR_TYPE));
+    if (!regSize.test(size) & size < 1) 
+        return res.send(response(baseResponse.SIZE_ERROR_TYPE)); // 2015 : size 번호를 확인해주세요.
 
     page = size * (page-1);
 
@@ -462,7 +463,7 @@ exports.getTimeSale = async function (req, res) {
 
 /**
  * API No. 
- * API Name : 혜택 상품 조회 API
+ * API Name : 세일 상품 조회 API
  * [GET] /products/sale
  */
 exports.getSale = async function (req, res) {
@@ -566,14 +567,14 @@ exports.getNewSale = async function (req, res) {
     if (!page)
         return res.send(response(baseResponse.PAGE_EMPTY)); // 2012 : page를 입력해주세요.
     
-    if (!regPage.test(page) & page < 1) // 2013 : page 번호를 확인해주세요.
-        return res.send(response(baseResponse.PAGE_ERROR_TYPE));
+    if (!regPage.test(page) & page < 1) 
+        return res.send(response(baseResponse.PAGE_ERROR_TYPE)); // 2013 : page 번호를 확인해주세요.
 
-    if (!size) // 2014 : size를 입력해주세요.
-        return res.send(response(baseResponse.SIZE_EMPTY));
+    if (!size) 
+        return res.send(response(baseResponse.SIZE_EMPTY)); // 2014 : size를 입력해주세요.
 
-    if (!regSize.test(size) & size < 1) // 2015 : size 번호를 확인해주세요.
-        return res.send(response(baseResponse.SIZE_ERROR_TYPE));
+    if (!regSize.test(size) & size < 1) 
+        return res.send(response(baseResponse.SIZE_ERROR_TYPE)); // 2015 : size 번호를 확인해주세요.
     
     // Category Filtering
     if (large) {
@@ -622,3 +623,74 @@ exports.getNewSale = async function (req, res) {
     
     return res.send(response(baseResponse.SUCCESS, newSaleProductResult));
 }
+
+/**
+ * API No. 
+ * API Name : 신상품 조회 API
+ * [GET] /products/new
+ */
+exports.getNew = async function (req, res) {
+
+    // Request Token
+    const userIdx = req.verifiedToken.userIdx;
+
+    // Request Query String
+    let {page, size} = req.query;
+    
+    // Request Body
+    const bodyIdx = req.body;
+    
+    // Validation Check (Request Error)
+    if (!userIdx | !bodyIdx) 
+        return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
+
+    if (userIdx !== parseInt(bodyIdx.bodyIdx))
+        return res.send(errResponse(baseResponse.ID_NOT_MATCHING)); // 2020 : userId가 다릅니다.
+
+    const checkUserIdx = await productProvider.userCheck(userIdx);
+
+    if (checkUserIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
+
+    if (!page)
+        return res.send(response(baseResponse.PAGE_EMPTY)); // 2012 : page를 입력해주세요.
+    
+    if (!regPage.test(page) & page < 1) 
+        return res.send(response(baseResponse.PAGE_ERROR_TYPE)); // 2013 : page 번호를 확인해주세요.
+
+    if (!size) 
+        return res.send(response(baseResponse.SIZE_EMPTY)); // 2014 : size를 입력해주세요.
+
+    if (!regSize.test(size) & size < 1) 
+        return res.send(response(baseResponse.SIZE_ERROR_TYPE)); // 2015 : size 번호를 확인해주세요.
+
+    page = size * (page-1);
+
+    // Home Product Result
+    let newProductResult = await productProvider.newProduct(page, size);
+
+    // Status Result
+    let getLikeProductStatus = await productProvider.likeProductStatus(userIdx);
+
+    // New Product Result <- Status
+    for (var i = 0; i < newProductResult.length; i++) {
+        
+        var flag = 0;
+        
+        for (var j = 0; j < getLikeProductStatus.length; j++) {
+            
+            if (newProductResult[i].productIdx === getLikeProductStatus[j].productIdx) {
+                newProductResult[i]["likeProductStatus"] = getLikeProductStatus[j].status;
+                flag = 1;
+                break;
+            }
+        }
+
+        // New Product Result 'N' Insert
+        if (flag === 0)
+            newProductResult[i]["likeProductStatus"] = 'N';
+    }
+    
+    return res.send(response(baseResponse.SUCCESS, newProductResult));
+
+ }
