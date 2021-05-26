@@ -92,7 +92,6 @@ exports.bestProduct = async function (page, size, condition, agecondition) {
   return bestProductResult;
 };
 
-<<<<<<< HEAD
 
 
 
@@ -161,7 +160,6 @@ exports.getLikeProductStatus = async function (userIdx) {
       return errResponse(baseResponse.DB_ERROR);
     }
 }
-=======
 // Get Time Sale Product
 exports.timeSaleProduct = async function (page, size) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -191,4 +189,3 @@ exports.newSaleProduct = async function (page, size, condition) {
 
   return newSaleProductResult;
 };
->>>>>>> dev1
