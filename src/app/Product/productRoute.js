@@ -13,4 +13,13 @@ module.exports = function(app){
 
     // API No ?. 베스트 상품 조회 API
     app.get('/products/best', jwtMiddleware, product.getBest);
+
+    // API No ?. 타임특가 상품 조회 API
+    app.get('/products/time-sale', jwtMiddleware, product.getTimeSale);
+
+    // API No ?. 혜택 상품 조회 API
+    app.get('/products/sale', jwtMiddleware, product.getSale);
+
+    // API No ?. 신상/헤택 상품 조회 API
+    app.get('/products/new-sale', jwtMiddleware, product.getNewSale);
 };
