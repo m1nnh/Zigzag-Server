@@ -35,7 +35,16 @@ module.exports = {
     LARGE_ERROR_TYPE : { "isSuccess": false, "code": 2024, "message": "large 번호를 확인해주세요." },
     CATEGORYREF_ERROR_TYPE : { "isSuccess": false, "code": 2025, "message": "cateogoryRef 번호를 확인해주세요." },
     PRODUCTIDX_NOT_EXIST : { "isSuccess": false, "code": 2026, "message": "존재하지 않는 상품입니다." },
-
+    CATEGORYIDX_ERROR_TYPE : { "isSuccess": false, "code": 2027, "message": "categoryIdx 번호를 확인해주세요." },
+    STOREIDX_EMPTY : { "isSuccess": false, "code": 2028, "message": "storeIdx를 입력해주세요." },
+    STOREIDX_NOT_EXIST : { "isSuccess": false, "code": 2029, "message": "존재하지 않는 쇼핑몰입니다." },
+    STOREIDX_ONLY_NUMBER : { "isSuccess": false, "code": 2030, "message": "storeIdx는 숫자만 입력이 가능합니다." },
+    PRODUCTIDX_ONLY_NUMBER : { "isSuccess": false, "code": 2031, "message": "productIdx는 숫자만 입력이 가능합니다." },
+    STATUS_EMPTY : { "isSuccess": false, "code": 2032, "message": "status 값을 입력해주세요." },
+    STATUS_ERROR_TYPE : { "isSuccess": false, "code": 2033, "message": "status는 Y또는 N을 입력해주세요." },
+    BRANDIDX_ERROR_TYPE : { "isSuccess": false, "code": 2034, "message": "brandIdx는 숫자만 입력이 가능합니다." },
+    BRANDIDX_NOT_EXIST : { "isSuccess": false, "code": 2035, "message": "해당 브랜드가 존재하지 않습니다." },
+    
     // Response error
     SIGNUP_REDUNDANT_EMAIL : { "isSuccess": false, "code": 3001, "message":"중복된 이메일입니다." },
     SIGNUP_REDUNDANT_PHONENUM : { "isSuccess": false, "code": 3002, "message":"중복된 휴대폰 번호입니다." },

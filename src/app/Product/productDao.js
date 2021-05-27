@@ -16,6 +16,52 @@ async function selectProductIdx(connection, productIdx) {
   return productIdxRow;
 }
 
+// storeIdx Check
+async function selectStoreIdx(connection, storeIdx) {
+  const storeIdxQuery = `
+    select exists(select storeIdx from Store where storeIdx = ?) as exist;
+     `;
+  const [storeIdxRow] = await connection.query(storeIdxQuery, storeIdx);
+  return storeIdxRow;
+}
+
+// brandIdx Check
+async function selectBrandIdx(connection, brandIdx) {
+  const brandIdxQuery = `
+    select exists(select brandIdx from Brand where brandIdx = ?) as exist;
+     `;
+  const [brandIdxRow] = await connection.query(brandIdxQuery, brandIdx);
+  return brandIdxRow;
+}
+
+// like Check
+async function selectLikeStatus(connection, [productIdx, userIdx]) {
+  const likeQuery = `
+  select exists(select productIdx from LikeProduct lp left join User u on lp.userIdx = u.userIdx where lp.productIdx = ? and lp.userIdx = ?) as exist;
+     `;
+  const [likeRow] = await connection.query(likeQuery, [productIdx, userIdx]);
+  return likeRow;
+}
+
+// Store Bookmark Check
+async function selectStoreBookmarkStatus(connection, [storeIdx, userIdx]) {
+  const bookmarkQuery = `
+  select exists(select storeIdx from Bookmark b left join User u on b.userIdx = u.userIdx where b.storeIdx = ? and b.userIdx = ?) as exist;
+     `;
+  const [bookmarkRow] = await connection.query(bookmarkQuery, [storeIdx, userIdx]);
+  return bookmarkRow;
+}
+
+// Brand Bookmark Check
+async function selectBrandBookmarkStatus(connection, [brandIdx, userIdx]) {
+  const bookmarkQuery = `
+  select exists(select brandIdx from Bookmark b left join User u on b.userIdx = u.userIdx where b.brandIdx = ? and b.userIdx = ?) as exist;
+     `;
+  const [bookmarkRow] = await connection.query(bookmarkQuery, [brandIdx, userIdx]);
+  return bookmarkRow;
+}
+
+
 
 // Get Home Product
 async function selectHomeProduct(connection, [page, size]) {
@@ -52,6 +98,44 @@ async function selectHomeProduct(connection, [page, size]) {
   const [homeProductRow] = await connection.query(homeProductQuery, [page, size]);
   
   return homeProductRow;
+}
+
+// Get Home Slide Product
+async function selectHomeSlideProduct(connection) {
+
+  const homeSlideProductQuery = `
+    select p.storeIdx,
+       p.productIdx,
+       thumbnailUrl,
+       zFlag,
+       s.storeName,
+       productContents,
+       case
+           when productSale > 0 and zSaleFlag = 'N'
+               then concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
+           when productSale > 0 and zSaleFlag = 'Y'
+               then concat('제트할인가 ', productPrice, '\n', productSale, '% ',
+                           format(productPrice * ((100 - productSale) / 100), 0))
+           else
+               format(productPrice, 0) end as resultPrice,
+       case
+           when s.deliveryPrice = 0
+               then '무료배송'
+           else
+               '' end                      as deliveryPrice,
+       case
+           when p.brandIdx is null
+               then ''
+           else
+               '브랜드' end                   as brandStatus
+  from Product p
+         left join Store s on s.storeIdx = p.storeIdx
+  order by rand()
+  limit 15;
+    `;
+  const [homeSlideProductRow] = await connection.query(homeSlideProductQuery);
+  
+  return homeSlideProductRow;
 }
 
 // Get Like Product Status
@@ -290,6 +374,44 @@ async function selectSaleProduct(connection, condition) {
   return saleProductRow;
 }
 
+// Get Category Sale Product
+async function selectCategorySaleProduct(connection, [condition, page, size]) {
+
+  const saleProductQuery = `
+    select p.storeIdx,
+        p.productIdx,
+        thumbnailUrl,
+        zFlag,
+        s.storeName,
+        p.productContents,
+        case
+            when productSale > 0 and zSaleFlag = 'N'
+                then concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
+            when productSale > 0 and zSaleFlag = 'Y'
+                then concat('제트할인가 ', productPrice, '\n', productSale, '% ',
+                            format(productPrice * ((100 - productSale) / 100), 0))
+            else
+                format(productPrice, 0) end as resultPrice,
+        case
+            when s.deliveryPrice = 0
+                then '무료배송'
+            else
+                '' end                      as deliveryPrice,
+        case
+            when p.brandIdx is null
+                then ''
+            else
+                '브랜드' end                   as brandStatus
+    from Product p
+          left join Store s on s.storeIdx = p.storeIdx
+          left join Category c on c.categoryIdx = p.categoryIdx
+    where ` + condition + `
+    limit ` + page + `, ` + size + `;`;
+  const [saleProductRow] = await connection.query(saleProductQuery, [condition, page, size]);
+  
+  return saleProductRow;
+}
+
 // Get New Sale Product
 async function selectNewSaleProduct(connection, [page, size, condition]) {
 
@@ -500,15 +622,189 @@ async function selectLastCategoryList(connection, categoryRef) {
     where categoryIdx = ?;
     `;
   const [categoryListRow] = await connection.query(categoryListQuery, categoryRef);
-  console
+
   return categoryListRow;
+}
+
+// Get Category Product
+async function selectCategoryProduct(connection, [condition, storeIdx, page, size]) {
+
+  const categoryProductQuery = `
+    select p.storeIdx,
+       p.productIdx,
+       thumbnailUrl,
+       zFlag,
+       s.storeName,
+       productContents,
+       case
+           when productSale > 0 and zSaleFlag = 'N'
+               then concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
+           when productSale > 0 and zSaleFlag = 'Y'
+               then concat('제트할인가 ', productPrice, '\n', productSale, '% ',
+                           format(productPrice * ((100 - productSale) / 100), 0))
+           else
+               format(productPrice, 0) end as resultPrice,
+       case
+           when s.deliveryPrice = 0
+               then '무료배송'
+           else
+               '' end                      as deliveryPrice,
+       case
+           when p.brandIdx is null
+               then ''
+           else
+               '브랜드' end                   as brandStatus
+  from Product p
+         left join Store s on s.storeIdx = p.storeIdx
+         left join Category c on p.categoryIdx = c.categoryIdx
+  where p.storeIdx = ? ` + condition + `
+  limit ` + page + `, ` + size + `;
+    `;
+  const [categoryProductRow] = await connection.query(categoryProductQuery, [storeIdx, condition, page, size]);
+  
+  return categoryProductRow;
+}
+
+// Get Product Info
+async function selectProductInfo(connection, productIdx) {
+
+  const productInfoQuery = `
+    select productIntro, cg.categoryName, c.colorName, s.sizeName, date_format(p.createdAt, '%Y.%m.%d') as createdAt, productPrec, country, storeName, quality, storePhoneNum
+    from Product p
+      left join Store st on p.storeIdx = st.storeIdx
+      left join Category cg on cg.categoryIdx = p.categoryIdx
+      left join ProductDetail pd on p.productIdx = pd.productIdx
+      left join Color c on pd.colorIdx = c.colorIdx
+      left join Size s on s.sizeIdx = pd.sizeIdx
+    where p.productIdx = ?;
+    `;
+  const [productInfoRow] = await connection.query(productInfoQuery, productIdx);
+
+  return productInfoRow;
+}
+
+// Get Recommendation Product
+async function selectRecommendationProduct(connection, storeIdx) {
+
+  const recommendationProductQuery = `
+    select p.storeIdx,
+       p.productIdx,
+       thumbnailUrl,
+       zFlag,
+       s.storeName,
+       productContents,
+       case
+           when productSale > 0 and zSaleFlag = 'N'
+               then concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
+           when productSale > 0 and zSaleFlag = 'Y'
+               then concat('제트할인가 ', productPrice, '\n', productSale, '% ',
+                           format(productPrice * ((100 - productSale) / 100), 0))
+           else
+               format(productPrice, 0) end as resultPrice,
+       case
+           when s.deliveryPrice = 0
+               then '무료배송'
+           else
+               '' end                      as deliveryPrice,
+       case
+           when p.brandIdx is null
+               then ''
+           else
+               '브랜드' end                   as brandStatus
+    from Product p
+         left join Store s on s.storeIdx = p.storeIdx
+    where s.storeIdx = ?
+    order by rand()
+    limit 15;
+    `;
+  const [recommendationProductRow] = await connection.query(recommendationProductQuery, storeIdx);
+
+  return recommendationProductRow;
+}
+
+// Insert Product Like
+async function insertLike(connection, [productIdx, userIdx]) {
+
+  const insertLikeQuery = `
+    insert into LikeProduct(productIdx, userIdx)
+    values (?, ?);
+    `;
+  const [insertLikeRow] = await connection.query(insertLikeQuery, [productIdx, userIdx]);
+
+  return insertLikeRow;
+}
+
+// Insert Store Bookmark
+async function insertStore(connection, [storeIdx, userIdx]) {
+
+  const insertBookmarkQuery = `
+    insert into Bookmark(storeIdx, userIdx)
+    values (?, ?);
+    `;
+  const [insertBookmarkRow] = await connection.query(insertBookmarkQuery, [storeIdx, userIdx]);
+
+  return insertBookmarkRow;
+}
+
+// Insert Brand Bookmark
+async function insertBrand(connection, [brandIdx, userIdx]) {
+
+  const insertBookmarkQuery = `
+    insert into Bookmark(brandIdx, userIdx)
+    values (?, ?);
+    `;
+  const [insertBookmarkRow] = await connection.query(insertBookmarkQuery, [brandIdx, userIdx]);
+
+  return insertBookmarkRow;
+}
+
+
+// Update Like Bookmark
+async function updateLike(connection, [productIdx, userIdx, status]) {
+
+  const updateBookmarkQuery = `
+    update LikeProduct
+    set status = ?
+    where productIdx = ? and userIdx = ?;
+    `;
+  const [updateLikeRow] = await connection.query(updateBookmarkQuery, [status, productIdx, userIdx]);
+
+  return updateLikeRow;
+}
+
+// Update Store Bookmark
+async function updateStore(connection, [storeIdx, userIdx, status]) {
+
+  const updateBookmarkQuery = `
+    update Bookmark
+    set status = ?
+    where storeIdx = ? and userIdx = ?;
+    `;
+  const [updateBookmarkRow] = await connection.query(updateBookmarkQuery, [status, storeIdx, userIdx]);
+
+  return updateBookmarkRow;
+}
+
+// Update Brand Bookmark
+async function updateBrand(connection, [brandIdx, userIdx, status]) {
+
+  const updateBookmarkQuery = `
+    update Bookmark
+    set status = ?
+    where brandIdx = ? and userIdx = ?;
+    `;
+  const [updateBookmarkRow] = await connection.query(updateBookmarkQuery, [status, brandIdx, userIdx]);
+
+  return updateBookmarkRow;
 }
 
 module.exports = {
     selectHomeProduct,
     selectLikeProductStatus,
     selectUserIdx,
+    selectStoreIdx,
     selectProductIdx,
+    selectBrandIdx,
     selectBrandProduct,
     selectCategoryIdx,
     selectBrandRank,
@@ -526,7 +822,20 @@ module.exports = {
     selectStoreStatus,
     selectFirstCategoryList,
     selectSecondCategoryList,
-    selectLastCategoryList
-    
+    selectLastCategoryList,
+    selectCategoryProduct,
+    selectProductInfo,
+    selectRecommendationProduct,
+    selectBrandBookmarkStatus,
+    selectStoreBookmarkStatus,
+    selectLikeStatus,
+    insertLike,
+    insertStore,
+    insertBrand,
+    updateLike,
+    updateStore,
+    updateBrand,
+    selectHomeSlideProduct,
+    selectCategorySaleProduct
   };
   
