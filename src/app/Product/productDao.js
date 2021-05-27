@@ -374,47 +374,9 @@ async function selectSaleProduct(connection, condition) {
   return saleProductRow;
 }
 
-// Get Category Sale Product
-async function selectCategorySaleProduct(connection, [condition, page, size]) {
-
-  const saleProductQuery = `
-    select p.storeIdx,
-        p.productIdx,
-        thumbnailUrl,
-        zFlag,
-        s.storeName,
-        p.productContents,
-        case
-            when productSale > 0 and zSaleFlag = 'N'
-                then concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
-            when productSale > 0 and zSaleFlag = 'Y'
-                then concat('제트할인가 ', productPrice, '\n', productSale, '% ',
-                            format(productPrice * ((100 - productSale) / 100), 0))
-            else
-                format(productPrice, 0) end as resultPrice,
-        case
-            when s.deliveryPrice = 0
-                then '무료배송'
-            else
-                '' end                      as deliveryPrice,
-        case
-            when p.brandIdx is null
-                then ''
-            else
-                '브랜드' end                   as brandStatus
-    from Product p
-          left join Store s on s.storeIdx = p.storeIdx
-          left join Category c on c.categoryIdx = p.categoryIdx
-    where ` + condition + `
-    limit ` + page + `, ` + size + `;`;
-  const [saleProductRow] = await connection.query(saleProductQuery, [condition, page, size]);
-  
-  return saleProductRow;
-}
-
 // Get New Sale Product
-async function selectNewSaleProduct(connection, [page, size, condition]) {
-
+async function selectSaleNewProduct(connection, [page, size, condition]) {
+  
   const newSaleProductQuery = `
     select p.storeIdx,
         p.productIdx,
@@ -443,14 +405,14 @@ async function selectNewSaleProduct(connection, [page, size, condition]) {
   from Product p
           left join Store s on s.storeIdx = p.storeIdx
           left join Category c on c.categoryIdx = p.categoryIdx
-  where timestampdiff(day, p.createdAt, CURRENT_TIMESTAMP()) < 7 and p.productSale != 0 ` + condition + `
+  where timestampdiff(day, p.createdAt, CURRENT_TIMESTAMP()) < 7 ` + condition + ` and p.productSale != 0 
   limit ` + page + `, ` + size + `;  
   `;
 
-  const [newSaleProductRow] = await connection.query(newSaleProductQuery, [page, size, condition]);
-  
+  const [newSaleProductRow] = await connection.query(newSaleProductQuery, [condition, page, size]);
+
   return newSaleProductRow;
-}
+};
 
 // Get New Product
 async function selectNewProduct(connection, [page, size]) {
@@ -489,6 +451,46 @@ async function selectNewProduct(connection, [page, size]) {
   const [newProductRow] = await connection.query(newProductQuery, [page, size]);
   
   return newProductRow;
+};
+
+
+// Get Category Sale Product
+async function selectCateProduct(connection, [page, size, cond]) {
+
+  const cateProductQuery = `
+    select p.storeIdx,
+        p.productIdx,
+        thumbnailUrl,
+        zFlag,
+        s.storeName,
+        p.productContents,
+        case
+            when productSale > 0 and zSaleFlag = 'N'
+                then concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
+            when productSale > 0 and zSaleFlag = 'Y'
+                then concat('제트할인가 ', productPrice, '\n', productSale, '% ',
+                            format(productPrice * ((100 - productSale) / 100), 0))
+            else
+                format(productPrice, 0) end as resultPrice,
+        case
+            when s.deliveryPrice = 0
+                then '무료배송'
+            else
+                '' end                      as deliveryPrice,
+        case
+            when p.brandIdx is null
+                then ''
+            else
+                '브랜드' end                   as brandStatus
+    from Product p
+          left join Store s on s.storeIdx = p.storeIdx
+          left join Category c on c.categoryIdx = p.categoryIdx
+    where ` + cond + `
+    limit ` + page + `, ` + size + `
+    `;
+  const [cateProductRow] = await connection.query(cateProductQuery, [page, size, cond]);
+
+  return cateProductRow;
 }
 
 
@@ -900,8 +902,9 @@ module.exports = {
     selectRankBrandProduct,
     selectBestProduct,
     selectTimeSaleProduct,
+    selectCateProduct,
     selectSaleProduct,
-    selectNewSaleProduct,
+    selectSaleNewProduct,
     selectNewProduct,
     selectProductImage,
     selectProductIntro,
@@ -924,7 +927,7 @@ module.exports = {
     updateStore,
     updateBrand,
     selectHomeSlideProduct,
-    selectCategorySaleProduct,
+
 
 
 
@@ -933,6 +936,7 @@ module.exports = {
     childCategory,
     likeProductStatus,
     detailCategoryIdx,
-    detailCategoryRef,
+    detailCategoryRef
+
   };
   

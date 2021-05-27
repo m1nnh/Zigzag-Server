@@ -179,20 +179,20 @@ exports.saleProduct = async function (condition) {
   return saleProductResult;
 };
 
-// Get Category Sale Product
-exports.categorySaleProduct = async function (condition, page, size) {
+// Get CateProduct
+exports.cateProduct = async function (page, size, cond) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const saleProductResult = await productDao.selectCategorySaleProduct(connection, [condition, page, size]);
+  const cateResult = await productDao.selectCateProduct(connection, [page, size, cond]);
 
   connection.release();
 
-  return saleProductResult;
-};
+  return cateResult;
+}
 
 // Get New Sale Product
 exports.newSaleProduct = async function (page, size, condition) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const newSaleProductResult = await productDao.selectNewSaleProduct(connection, [page, size, condition]);
+  const newSaleProductResult = await productDao.selectSaleNewProduct(connection, [page, size, condition]);
 
   connection.release();
 

@@ -607,8 +607,7 @@ exports.getCategorySale = async function (req, res) {
 
     // Request Body
     const bodyIdx = req.body;
-
-    let condition = '';
+    var cond;
     let saleProductResult;
 
     // Validation Check (Request Error)
@@ -640,16 +639,15 @@ exports.getCategorySale = async function (req, res) {
 
     page = size * (page-1);
 
-
+   
     // Category Sale Product Result
     if (categoryRef == 1) {
-
-        condition += 's.deliveryPrice = 0'
-        saleProductResult = await productProvider.categorySaleProduct(condition, page, size);
+        cond = 's.deliveryPrice = 0'
+        saleProductResult = await productProvider.cateProduct(page, size, cond);
     }
     else {
-        condition += 'c.categoryRef = ' + categoryRef;
-        saleProductResult = await productProvider.categorySaleProduct(condition, page, size);
+        cond = 'c.categoryRef = ' + categoryRef;
+        saleProductResult = await productProvider.cateProduct(page, size, cond);
         
     }
     // Status Result
@@ -736,7 +734,7 @@ exports.getNewSale = async function (req, res) {
     }
     else
         condition = ''
-
+    console.log(1);
     page = size * (page-1);
 
     // New Sale Product Result
@@ -782,7 +780,7 @@ exports.getNew = async function (req, res) {
     
     // Request Body
     const bodyIdx = req.body;
-    
+
     // Validation Check (Request Error)
     if (!userIdx | !bodyIdx) 
         return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
@@ -1712,7 +1710,7 @@ exports.patchLike = async function (req, res) {
 
     if (!regNum.test(productIdx) & productIdx < 1)
         return res.send(response(baseResponse.PRODUCTIDX_ONLY_NUMBER)); // 2031 : productIdx는 숫자만 입력이 가능합니다.
-    console.log(productIdx);
+
     const checkProductIdx = await productProvider.productIdxCheck(productIdx);
     
     if (checkProductIdx[0].exist === 0)
