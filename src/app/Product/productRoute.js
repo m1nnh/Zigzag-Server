@@ -23,14 +23,14 @@ module.exports = function(app){
     // API No. ? 세일 상품 조회 API (슬라이드)
     app.get('/products/sale', jwtMiddleware, product.getSale);
 
-    // API No. ? 카테고리별 상품 전체 조회 API
-    app.get('/products/:categoryRef', jwtMiddleware, product.getCategorySale);
-
     // API No. ? 신상/세일 상품 조회 API
     app.get('/products/new-sale', jwtMiddleware, product.getNewSale);
 
     // API No. ? 신상품 조회 API
     app.get('/products/new', jwtMiddleware, product.getNew);
+    
+    // // API No. ? 카테고리별 상품 전체 조회 API
+    app.get('/products/:categoryRef', jwtMiddleware, product.getCategorySale);
 
     // API No. ? 상품 인트로 조회 API
     app.get('/products/:productIdx/intro', jwtMiddleware, product.getProductIntro);
