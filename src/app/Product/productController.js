@@ -809,7 +809,7 @@ exports.getNew = async function (req, res) {
 
     page = size * (page-1);
 
-    // Home Product Result
+    // new Product Result
     let newProductResult = await productProvider.newProduct(page, size);
 
     // Status Result
