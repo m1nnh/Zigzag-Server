@@ -1588,7 +1588,7 @@ exports.getProductRecommendation = async function (req, res) {
 
         // Home Product Result 'N' Insert
         if (flag === 0)
-            hrecommendationProductResult[i]["likeProductStatus"] = 'N';
+            recommendationProductResult[i]["likeProductStatus"] = 'N';
     }
     
     return res.send(response(baseResponse.SUCCESS, recommendationProductResult));
