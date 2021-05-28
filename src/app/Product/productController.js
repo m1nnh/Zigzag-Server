@@ -225,7 +225,7 @@ exports.getBrandRank = async function (req, res) {
     // Request Body
     const bodyIdx = req.body;
 
-    let condition = ''
+    var condition = ''
 
     // Validation Check (Request Error)
     if (!userIdx | !bodyIdx) 
@@ -251,7 +251,7 @@ exports.getBrandRank = async function (req, res) {
             var secondCategoryIdxRow = await productProvider.categoryIdx(large);
             let last = secondCategoryIdxRow[secondCategoryIdxRow.length - 1].categoryIdx;
 
-            condition = 'where categoryRef between ' + first + ' and ' + last;
+            condition += 'and categoryRef between ' + first + ' and ' + last
         }
 
         else if (large == 2) {
@@ -260,7 +260,7 @@ exports.getBrandRank = async function (req, res) {
             let first = categoryIdxRow[1].categoryIdx;
             let last = categoryIdxRow[categoryIdxRow.length - 1].categoryIdx;
 
-            condition = 'where categoryRef between ' + first + ' and ' + last;
+            condition += 'and categoryRef between ' + first + ' and ' + last;
         }
 
         else if (large == 3) {
@@ -269,7 +269,7 @@ exports.getBrandRank = async function (req, res) {
             let first = categoryIdxRow[1].categoryIdx;
             let last = categoryIdxRow[categoryIdxRow.length - 1].categoryIdx;
 
-            condition = 'where categoryRef between ' + first + ' and ' + last;
+            condition = 'and categoryRef between ' + first + ' and ' + last;
         }
 
         else if (large == 4) {
@@ -278,7 +278,7 @@ exports.getBrandRank = async function (req, res) {
             let first = categoryIdxRow[1].categoryIdx;
             let last = categoryIdxRow[categoryIdxRow.length - 1].categoryIdx;
 
-            condition = 'where categoryRef between ' + first + ' and ' + last;
+            condition = 'and categoryRef between ' + first + ' and ' + last;
         }
 
         else if (large == 5) {
@@ -287,7 +287,7 @@ exports.getBrandRank = async function (req, res) {
             let first = categoryIdxRow[1].categoryIdx;
             let last = categoryIdxRow[categoryIdxRow.length - 1].categoryIdx;
 
-            condition = 'where categoryRef between ' + first + ' and ' + last;
+            condition = 'and categoryRef between ' + first + ' and ' + last;
         }
 
         else if (large == 6) {
@@ -296,14 +296,14 @@ exports.getBrandRank = async function (req, res) {
             let first = categoryIdxRow[1].categoryIdx;
             let last = categoryIdxRow[categoryIdxRow.length - 1].categoryIdx;
 
-            condition = 'where categoryRef between ' + first + ' and ' + last;
+            condition = 'and categoryRef between ' + first + ' and ' + last;
         }
 
         else 
             return res.send(errResponse(baseResponse.LARGE_ERROR_TYPE)); // 2024 : large 번호를 확인해주세요.
     }
     else
-        condition = ''
+        condition = 'where b.status = ' + 'N'
 
     // Rank Result
     var rankResult = await productProvider.brandRank(condition);
@@ -344,6 +344,340 @@ exports.getBrandRank = async function (req, res) {
 
 }
 
+/**
+ * API No. 
+ * API Name : 브랜드별 인트로 조회 API
+ * [GET] /brands/:brandIdx/intro
+ */
+
+exports.getBrandIntro = async function(req, res) {
+
+    // Request Token
+    const userIdx = req.verifiedToken.userIdx;
+
+    // Request Path Variable
+    const {brandIdx} = req.params;
+
+    // Request Body
+    const bodyIdx = req.body;
+
+    // Validation Check (Request Error)
+    if (!userIdx | !bodyIdx) 
+        return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
+
+    if (userIdx !== parseInt(bodyIdx.bodyIdx))
+        return res.send(errResponse(baseResponse.ID_NOT_MATCHING)); // 2020 : userId가 다릅니다.
+
+    const checkUserIdx = await productProvider.userCheck(userIdx);
+
+    if (checkUserIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
+
+    if (!regNum.test(brandIdx) & brandIdx < 1)
+        return res.send(response(baseResponse.BRANDIDX_ERROR_TYPE)); // 2034 : brandIdx는 숫자만 입력이 가능합니다.
+    
+    const checkBrandIdx = await productProvider.brandIdxCheck(brandIdx);
+
+    if (checkBrandIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.BRANDIDX_NOT_EXIST)) // 2035 : 해당 브랜드가 존재하지 않습니다.
+
+    // Brand Intro Result
+    const brandIntroResult = await productProvider.brandIntro(brandIdx, userIdx)
+    
+    return res.send(response(baseResponse.SUCCESS, brandIntroResult));
+
+ }
+
+/**
+ * API No. 
+ * API Name : 브랜드별 이번 주 베스트 상품 조회 API
+ * [GET] /products/:brandIdx/week-best
+ */
+exports.getWeekBest = async function (req, res) {
+
+    // Request Token
+    const userIdx = req.verifiedToken.userIdx;
+
+    // Request Body
+    const bodyIdx = req.body;
+
+    // Request Path Variable
+    const {brandIdx} = req.params;
+
+    // Validation Check (Request Error)
+    if (!userIdx | !bodyIdx) 
+        return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
+
+    if (userIdx !== parseInt(bodyIdx.bodyIdx))
+        return res.send(errResponse(baseResponse.ID_NOT_MATCHING)); // 2020 : userId가 다릅니다.
+
+    const checkUserIdx = await productProvider.userCheck(userIdx);
+
+    if (checkUserIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
+    
+    const checkBrandIdx = await productProvider.brandIdxCheck(brandIdx);
+
+    if (checkBrandIdx[0].exisit === 0)
+        return res.send(errResponse(baseResponse.BRANDIDX_NOT_EXIST)) // 2035 : 해당 브랜드가 존재하지 않습니다.
+    
+    // categoryIdx, categoryName
+    const categoryList = await productProvider.categoryList(brandIdx);
+    
+    // Week Best Product Result
+    let weekBestResult = await productProvider.weekBestProduct(brandIdx);
+
+    // Status Result
+    let getLikeProductStatus = await productProvider.likeProductStatus(userIdx);
+
+    // Home Slide Product Result <- Status
+    for (var i = 0; i < weekBestResult.length; i++) {
+        
+        var flag = 0;
+        
+        for (var j = 0; j < getLikeProductStatus.length; j++) {
+            
+            if (weekBestResult[i].productIdx === getLikeProductStatus[j].productIdx) {
+                weekBestResult[i]["likeProductStatus"] = getLikeProductStatus[j].status;
+                flag = 1;
+                break;
+            }
+        }
+
+        // Home Product Result 'N' Insert
+        if (flag === 0)
+            weekBestResult[i]["likeProductStatus"] = 'N';
+    }
+    
+    return res.send(response(baseResponse.SUCCESS, {categoryList, weekBestResult}));
+
+ }
+
+ /**
+ * API No. 
+ * API Name : 브랜드별 카테고리 상품 조회 API
+ * [GET] /products/:brandIdx/category
+ */
+exports.getBrandCategory = async function (req, res) {
+
+    // Request Token
+    const userIdx = req.verifiedToken.userIdx;
+
+    // Request Query String
+    let {page, size, categoryIdx, filter} = req.query;
+    
+    // Request Path Varialbe
+    const {brandIdx} = req.params;
+
+    // Request Body
+    const bodyIdx = req.body;
+
+    var condition = 'order by '
+    var category = ''
+
+    // Validation Check (Request Error)
+    if (!userIdx | !bodyIdx) 
+        return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
+
+    if (userIdx !== parseInt(bodyIdx.bodyIdx))
+        return res.send(errResponse(baseResponse.ID_NOT_MATCHING)); // 2020 : userId가 다릅니다.
+
+    const checkUserIdx = await productProvider.userCheck(userIdx);
+
+    if (checkUserIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
+
+    if (!page)
+        return res.send(response(baseResponse.PAGE_EMPTY)); // 2012 : page를 입력해주세요.
+    
+    if (!regPage.test(page) & page < 1) 
+        return res.send(response(baseResponse.PAGE_ERROR_TYPE)); // 2013 : page 번호를 확인해주세요.
+
+    if (!size) 
+        return res.send(response(baseResponse.SIZE_EMPTY)); // 2014 : size를 입력해주세요.
+
+    if (!regSize.test(size) & size < 1) 
+        return res.send(response(baseResponse.SIZE_ERROR_TYPE)); // 2015 : size 번호를 확인해주세요.
+
+        const checkBrandIdx = await productProvider.brandIdxCheck(brandIdx);
+
+    if (checkBrandIdx[0].exisit === 0)
+        return res.send(errResponse(baseResponse.BRANDIDX_NOT_EXIST)) // 2035 : 해당 브랜드가 존재하지 않습니다.
+        
+    if (categoryIdx.length > 0)
+        category = ' and c.categoryIdx = ' + categoryIdx
+    else 
+        category = ''
+
+    switch(filter) {
+        case '1' : condition += 'ifnull(readCount, 0) + ifnull(sum(pb.productNum), 0) DESC'; break;
+        case '2' : condition += 'ifnull(reviewCount, 0'; break;
+        case '3' : condition += 'productPrice * ((100 - productSale) / 100) ASC'; break;
+        case '4' : condition += 'productPrice * ((100 - productSale) / 100) DESC'; break;
+        default : condition += 'p.createdAt ASC'; break;
+    } 
+    
+    page = size * (page-1);
+
+    // Category Product Result
+    const categoryProductResult = await productProvider.brandCategoryProduct(page, size, category, condition, brandIdx);
+
+    // Status Result
+    let getLikeProductStatus = await productProvider.likeProductStatus(userIdx);
+
+    // Best Product Result <- Status
+    for (var i = 0; i < categoryProductResult.length; i++) {
+        
+        var flag = 0;
+        
+        for (var j = 0; j < getLikeProductStatus.length; j++) {
+            
+            if (categoryProductResult[i].productIdx === getLikeProductStatus[j].productIdx) {
+                categoryProductResult[i]["likeProductStatus"] = getLikeProductStatus[j].status;
+                flag = 1;
+                break;
+            }
+        }
+
+        // Best Product 'N' Insert
+        if (flag === 0)
+        categoryProductResult[i]["likeProductStatus"] = 'N';
+    }
+    
+    return res.send(response(baseResponse.SUCCESS, categoryProductResult));
+}
+
+ /**
+ * API No. 
+ * API Name : 브랜드별 쿠폰 리스트 조회 API
+ * [GET] /brands/:brandIdx/coupon-list
+ */
+exports.getBrandCoupon = async function(req, res) {
+
+    // Request Token
+    const userIdx = req.verifiedToken.userIdx;
+
+    // Request Path Variable
+    const {brandIdx} = req.params;
+
+    // Request Body
+    const bodyIdx = req.body;
+
+    // Validation Check (Request Error)
+    if (!userIdx | !bodyIdx) 
+        return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
+
+    if (userIdx !== parseInt(bodyIdx.bodyIdx))
+        return res.send(errResponse(baseResponse.ID_NOT_MATCHING)); // 2020 : userId가 다릅니다.
+
+    const checkUserIdx = await productProvider.userCheck(userIdx);
+
+    if (checkUserIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
+
+    if (!regNum.test(brandIdx) & brandIdx < 1)
+        return res.send(response(baseResponse.BRANDIDX_ERROR_TYPE)); // 2034 : brandIdx는 숫자만 입력이 가능합니다.
+    
+    const checkBrandIdx = await productProvider.brandIdxCheck(brandIdx);
+
+    if (checkBrandIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.BRANDIDX_NOT_EXIST)) // 2035 : 해당 브랜드가 존재하지 않습니다.
+
+    // Brand Name
+    const brandName = await productProvider.brandName(brandIdx);
+
+    // Coupon Result
+    const brandCouponResult = await productProvider.brandCoupon(brandIdx, userIdx);
+    
+    // 
+    var result = []
+    result[0] = brandName[0];
+    result[1] = brandCouponResult;
+
+    result[1][0]["status"] = 'N'
+
+    for (var i = 0; i < result[1].length; i++) {
+        var couponIdx = result[1][i].couponIdx;
+        var have = await productProvider.haveFlag(couponIdx, userIdx);
+
+        if (have[0].exist === 0)
+            result[1][i]["status"] = 'N'
+        else 
+            result[1][i]["status"] = 'Y'
+    }
+
+    return res.send(response(baseResponse.SUCCESS, result));
+ }
+ 
+/**
+ * API No. 
+ * API Name : 브랜드별 쿠폰 등록 API
+ * [POST] /brands/:brandIdx/coupon
+ */
+exports.postBrandCoupon = async function(req, res) {
+
+    // Request Token
+    const userIdx = req.verifiedToken.userIdx;
+
+    // Request Path Variable
+    const {brandIdx} = req.params;
+
+    // Request Query Stirng
+    const {number} = req.query;
+
+    // Request Body
+    const bodyIdx = req.body;
+
+    // Validation Check (Request Error)
+    if (!userIdx | !bodyIdx) 
+        return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
+
+    if (userIdx !== parseInt(bodyIdx.bodyIdx))
+        return res.send(errResponse(baseResponse.ID_NOT_MATCHING)); // 2020 : userId가 다릅니다.
+
+    const checkUserIdx = await productProvider.userCheck(userIdx);
+
+    if (checkUserIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
+
+    if (!regNum.test(brandIdx) & brandIdx < 1)
+        return res.send(response(baseResponse.BRANDIDX_ERROR_TYPE)); // 2034 : brandIdx는 숫자만 입력이 가능합니다.
+    
+    const checkBrandIdx = await productProvider.brandIdxCheck(brandIdx);
+
+    if (checkBrandIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.BRANDIDX_NOT_EXIST)) // 2035 : 해당 브랜드가 존재하지 않습니다.
+
+    // Coupon Result
+    const brandCouponResult = await productProvider.brandCoupon(brandIdx, userIdx);
+    console.log(brandCouponResult[0].couponIdx);
+
+    if (number == 0) {
+        for (var i = 0; i < brandCouponResult.length; i++) {
+            var couponIdx = brandCouponResult[i].couponIdx;
+            var have = await productProvider.haveFlag(couponIdx, userIdx);
+
+            if (have[0].exist === 0)
+                await productService.brandCoupon(couponIdx, userIdx);
+            else 
+                continue;
+        }
+    }
+    else if (number <= brandCouponResult.length) {
+        var couponIdx = brandCouponResult[number - 1].couponIdx;
+        var have = await productProvider.haveFlag(couponIdx, userIdx);
+        if (have[0].exist === 0)
+            await productService.brandCoupon(couponIdx, userIdx);
+
+        else 
+            return res.send(errResponse(baseResponse.COUPONIDX_EXIST)) // 2036 : 해당 쿠폰이 이미 존재합니다.
+    }
+    else
+        return res.send(errResponse(baseResponse.NUMBER_ERROR_TYPE)) // 2037 : number 번호를 확인해주세요.
+
+    return res.send(response(baseResponse.SUCCESS));
+ }
+
  /**
  * API No. 
  * API Name : 베스트 상품 조회 API
@@ -360,7 +694,7 @@ exports.getBest = async function (req, res) {
     // Request Body
     const bodyIdx = req.body;
 
-    let condition = ''
+    var condition = 'where p.status = ' + 'N '
     var agecondition = ' and u.birth between '
 
     // Validation Check (Request Error)
@@ -396,17 +730,13 @@ exports.getBest = async function (req, res) {
             const first = categoryIdxRow[1].categoryIdx;
             const last = categoryIdxRow[categoryIdxRow.length - 1].categoryIdx;
 
-            condition = 'where categoryRef between ' + first + ' and ' + last;
+            condition = 'and categoryRef between ' + first + ' and ' + last;
         }
         else 
             return res.send(errResponse(baseResponse.LARGE_ERROR_TYPE)); // 2024 : large 번호를 확인해주세요. 
     }
     else
-        condition = ''
-
-    // Not Category Filtering
-    if (!condition) 
-        agecondition = 'where u.birth between '
+        condition = 'where p.status = ' + 'N'
 
     // Age Filtering
     switch (agefilter) {
@@ -641,11 +971,11 @@ exports.getCategorySale = async function (req, res) {
    
     // Category Sale Product Result
     if (categoryRef == 1) {
-        cond = 's.deliveryPrice = 0'
+        cond = 'and s.deliveryPrice = 0'
         saleProductResult = await productProvider.cateProduct(page, size, cond);
     }
     else {
-        cond = 'c.categoryRef = ' + categoryRef;
+        cond = 'and c.categoryRef = ' + categoryRef;
         saleProductResult = await productProvider.cateProduct(page, size, cond);
         
     }
@@ -733,7 +1063,7 @@ exports.getNewSale = async function (req, res) {
     }
     else
         condition = ''
-    console.log(1);
+
     page = size * (page-1);
 
     // New Sale Product Result
@@ -874,9 +1204,138 @@ exports.getNew = async function (req, res) {
 
     // Intro Result
     const productIntroResult = await productProvider.productIntro(productIdx, userIdx)
-    
+
     return res.send(response(baseResponse.SUCCESS, productIntroResult));
 
+ }
+
+ /**
+ * API No. 
+ * API Name : 상품별 쿠폰 리스트 조회 API
+ * [GET] /products/:productIdx/coupon-list
+ */
+exports.getProductCoupon = async function(req, res) {
+
+    // Request Token
+    const userIdx = req.verifiedToken.userIdx;
+
+    // Request Path Variable
+    const {productIdx} = req.params;
+
+    // Request Body
+    const bodyIdx = req.body;
+
+    // Validation Check (Request Error)
+    if (!userIdx | !bodyIdx) 
+        return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
+
+    if (userIdx !== parseInt(bodyIdx.bodyIdx))
+        return res.send(errResponse(baseResponse.ID_NOT_MATCHING)); // 2020 : userId가 다릅니다.
+
+    const checkUserIdx = await productProvider.userCheck(userIdx);
+
+    if (checkUserIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
+
+    if (!regNum.test(productIdx) & productIdx < 1)
+        return res.send(response(baseResponse.PRODUCTIDX_ONLY_NUMBER)); // 2031 : productIdx는 숫자만 입력이 가능합니다.
+    
+    const checkProductIdx = await productProvider.productIdxCheck(productIdx);
+
+    if (checkProductIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.PRODUCTIDX_NOT_EXIST)) // 2026 : 존재하지 않는 상품입니다.
+
+    // Brand Name
+    const storeName = await productProvider.storeName(productIdx);
+
+    // Coupon Result
+    const productCouponResult = await productProvider.productCoupon(productIdx, userIdx);
+    
+    var result = []
+    result[0] = storeName[0];
+    result[1] = productCouponResult;
+
+    result[1][0]["status"] = 'N'
+
+    for (var i = 0; i < result[1].length; i++) {
+        var couponIdx = result[1][i].couponIdx;
+        var have = await productProvider.haveFlag(couponIdx, userIdx);
+
+        if (have[0].exist === 0)
+            result[1][i]["status"] = 'N'
+        else 
+            result[1][i]["status"] = 'Y'
+    }
+
+    return res.send(response(baseResponse.SUCCESS, result));
+ }
+ 
+/**
+ * API No. 
+ * API Name : 상품별 쿠폰 등록 API
+ * [POST] /products/:productIdx/coupon
+ */
+exports.postProductCoupon = async function(req, res) {
+
+    // Request Token
+    const userIdx = req.verifiedToken.userIdx;
+
+    // Request Path Variable
+    const {productIdx} = req.params;
+
+    // Request Query Stirng
+    const {number} = req.query;
+
+    // Request Body
+    const bodyIdx = req.body;
+
+    // Validation Check (Request Error)
+    if (!userIdx | !bodyIdx) 
+        return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
+
+    if (userIdx !== parseInt(bodyIdx.bodyIdx))
+        return res.send(errResponse(baseResponse.ID_NOT_MATCHING)); // 2020 : userId가 다릅니다.
+
+    const checkUserIdx = await productProvider.userCheck(userIdx);
+
+    if (checkUserIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
+
+    if (!regNum.test(productIdx) & productIdx < 1)
+        return res.send(response(baseResponse.PRODUCTIDX_ONLY_NUMBER)); // 2031 : productIdx는 숫자만 입력이 가능합니다.
+    
+    const checkProductIdx = await productProvider.productIdxCheck(productIdx);
+
+    if (checkProductIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.PRODUCTIDX_NOT_EXIST)) // 2026 : 존재하지 않는 상품입니다.
+
+    // Coupon Result
+    const productCouponResult = await productProvider.productCoupon(productIdx, userIdx);
+
+    if (number == 0) {
+        for (var i = 0; i < productCouponResult.length; i++) {
+            var couponIdx = productCouponResult[i].couponIdx;
+            var have = await productProvider.haveFlag(couponIdx, userIdx);
+
+            if (have[0].exist === 0)
+                await productService.productCoupon(couponIdx, userIdx);
+            else 
+                continue;
+        }
+    }
+    else if (number <= productCouponResult.length) {
+        var couponIdx = productCouponResult[number - 1].couponIdx;
+        var have = await productProvider.haveFlag(couponIdx, userIdx);
+        if (have[0].exist === 0)
+            await productService.productCoupon(couponIdx, userIdx);
+
+        else 
+            return res.send(errResponse(baseResponse.COUPONIDX_EXIST)) // 2036 : 해당 쿠폰이 이미 존재합니다.
+    }
+    else
+        return res.send(errResponse(baseResponse.NUMBER_ERROR_TYPE)) // 2037 : number 번호를 확인해주세요.
+
+    return res.send(response(baseResponse.SUCCESS));
  }
 
  /**

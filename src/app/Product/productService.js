@@ -69,3 +69,21 @@ exports.updateBrand = async function (brandIdx, userIdx, status) {
 
     return updateResult;
 }
+
+// Insert Brand Coupon
+exports.brandCoupon= async function (couponIdx, userIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const insertResult = await productDao.insertBrandCoupon(connection, [couponIdx, userIdx]);
+    connection.release();
+
+    return insertResult;
+}
+
+// Insert Product Coupon
+exports.productCoupon= async function (couponIdx, userIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const insertResult = await productDao.insertProductCoupon(connection, [couponIdx, userIdx]);
+    connection.release();
+
+    return insertResult;
+}

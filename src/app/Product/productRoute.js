@@ -12,7 +12,22 @@ module.exports = function(app){
     app.get('/products/brand', jwtMiddleware, product.getBrand);
    
     // API No. ? 랭킹별 브랜드 상품 조회 API
-    app.get('/products/brand/rank', jwtMiddleware, product.getBrandRank);
+    app.get('/products/brand-rank', jwtMiddleware, product.getBrandRank);
+
+    // API No. ? 브랜드별 인트로 조회 API
+    app.get('/brands/:brandIdx/intro', jwtMiddleware, product.getBrandIntro);
+
+    // API No. ? 브랜드별 이번 주 베스트 상품 조회 API
+    app.get('/products/:brandIdx/week-best', jwtMiddleware, product.getWeekBest);
+
+    // API No. ? 브랜드별 카테고리 상품 조회 API
+    app.get('/products/:brandIdx/category', jwtMiddleware, product.getBrandCategory);
+
+    // API No. ? 브랜드별 쿠폰 리스트 조회 API 
+    app.get('/brands/:brandIdx/coupon-list', jwtMiddleware, product.getBrandCoupon);
+
+    // API No. ? 브랜드별 쿠폰 등록 API
+    app.post('/brands/:brandIdx/coupon', jwtMiddleware, product.postBrandCoupon);
 
     // API No. ? 베스트 상품 조회 API
     app.get('/products/best', jwtMiddleware, product.getBest);
@@ -29,12 +44,18 @@ module.exports = function(app){
     // API No. ? 신상품 조회 API
     app.get('/products/new', jwtMiddleware, product.getNew);
     
-    // // API No. ? 카테고리별 상품 전체 조회 API
+    // API No. ? 카테고리별 상품 전체 조회 API
     app.get('/products/:categoryRef', jwtMiddleware, product.getCategorySale);
 
     // API No. ? 상품 인트로 조회 API
     app.get('/products/:productIdx/intro', jwtMiddleware, product.getProductIntro);
     
+    // API No. ? 상품별 쿠폰 리스트 조회 API
+    app.get('/products/:productIdx/coupon-list', jwtMiddleware, product.getProductCoupon);
+
+    // API No. ? 상품별 쿠폰 등록 API
+    app.post('/products/:productIdx/coupon', jwtMiddleware, product.postProductCoupon);
+
     // API No. ? 카테고리별 스토어 상품 조회 API
     app.get('/products/:categoryIdx/store', jwtMiddleware, product.getProductCategoryStore);
     
