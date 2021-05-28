@@ -1,7 +1,7 @@
 // userIdx Check
 async function selectUserIdx(connection, userIdx) {
   const userIdxQuery = `
-    select exists(select userIdx from User where userIdx = ?) as exist;
+    select exists(select userIdx from User where userIdx = ? and status = 'N') as exist;
      `;
   const [userIdxRow] = await connection.query(userIdxQuery, userIdx);
   return userIdxRow;
@@ -10,7 +10,7 @@ async function selectUserIdx(connection, userIdx) {
 // productIdx Check
 async function selectProductIdx(connection, productIdx) {
   const productIdxQuery = `
-    select exists(select productIdx from Product where productIdx = ?) as exist;
+    select exists(select productIdx from Product where productIdx = ? and status = 'N') as exist;
      `;
   const [productIdxRow] = await connection.query(productIdxQuery, productIdx);
   return productIdxRow;
@@ -19,7 +19,7 @@ async function selectProductIdx(connection, productIdx) {
 // storeIdx Check
 async function selectStoreIdx(connection, storeIdx) {
   const storeIdxQuery = `
-    select exists(select storeIdx from Store where storeIdx = ?) as exist;
+    select exists(select storeIdx from Store where storeIdx = ? and status = 'N') as exist;
      `;
   const [storeIdxRow] = await connection.query(storeIdxQuery, storeIdx);
   return storeIdxRow;
@@ -28,7 +28,7 @@ async function selectStoreIdx(connection, storeIdx) {
 // brandIdx Check
 async function selectBrandIdx(connection, brandIdx) {
   const brandIdxQuery = `
-    select exists(select brandIdx from Brand where brandIdx = ?) as exist;
+    select exists(select brandIdx from Brand where brandIdx = ? and status = 'N') as exist;
      `;
   const [brandIdxRow] = await connection.query(brandIdxQuery, brandIdx);
   return brandIdxRow;
@@ -92,6 +92,7 @@ async function selectHomeProduct(connection, [page, size]) {
               '브랜드' end                   as brandStatus
     from Product p
         left join Store s on s.storeIdx = p.storeIdx
+    where p.status= 'N'
     order by rand()
     limit ` + page + `, ` + size + `;
     `;
@@ -130,6 +131,7 @@ async function selectHomeSlideProduct(connection) {
                '브랜드' end                   as brandStatus
   from Product p
          left join Store s on s.storeIdx = p.storeIdx
+  where p.status = 'N'
   order by rand()
   limit 15;
     `;
@@ -182,7 +184,7 @@ async function selectBrandProduct(connection, [page, size, brandIdx]) {
          left join Store s on s.storeIdx = p.storeIdx
          left join LikeProduct lp on lp.productIdx = p.productIdx
          left join Brand b on b.brandIdx = p.brandIdx
-  where p.brandIdx = ?
+  where p.brandIdx = ? and p.status = 'N'
   order by rand()
   limit ` + page + `, ` + size + `;
   `;
@@ -211,7 +213,7 @@ async function selectBrandRank(connection, condition) {
             left join Product p on p.brandIdx = b.brandIdx
             left join ReadCount rc on rc.productIdx = p.productIdx
             left join Category c on p.categoryIdx = c.categoryIdx
-    `+ condition +`
+    where b.status = 'N' `+ condition +`
     group by brandIdx
     order by ifnull(count(rc.productIdx),0) DESC
     limit 3;
@@ -244,13 +246,232 @@ async function selectRankBrandProduct(connection, brandIdx) {
   from Brand b
   left join Product p on p.brandIdx = b.brandIdx
   left join Store s on s.storeIdx = p.storeIdx
-  where b.brandIdx = ? 
+  where b.brandIdx = ? and p.status = 'N'
   limit 20`;
 
     
   const [brandProductRow] = await connection.query(brandProductQuery, brandIdx);
   
   return brandProductRow;
+}
+
+// Get Brand Intro 
+async function selectBrandIntro(connection, [brandIdx, userIdx]) {
+
+  const brandIntroQuery = `
+  select b.brandIdx,
+  brandUrl,
+  brandName,
+  ifnull(bookmarkCount, 0) as bookmarkCount,
+  ifnull((select case
+              when bm.status is null
+                  then 'N'
+              else
+                  bm.status end as status
+   from Bookmark bm
+            left join User u on u.userIdx = bm.userIdx
+   where u.userIdx = ?
+     and bm.brandIdx = ?), 'N')                                         as bookmarkStatus,
+  concat('모두 ', mainCategoryName)                                 as mainCategoryName,
+  case
+      when maxCouponPrice is null
+          then ''
+      else
+          concat('최대 ', format(maxCouponPrice, 0), '원 할인 쿠폰') end as maxCouponPrice,
+  concat(ifnull(v.reviewCount, 0), '개')                           as reviewCount,
+  ifnull(v.score, 0)                                              as score,
+  case
+      when s.freeDeliveryStd = 0
+          then '전 상품 무료'
+      else
+          concat(format(s.freeDeliveryStd, 0), '원 이상 무료') end     as delivery
+from Brand b
+    left join Product p on b.brandIdx = p.brandIdx
+    left join (select ifnull(count(bm.brandIdx), 0) as bookmarkCount, bm.brandIdx
+               from Bookmark bm
+               group by bm.brandIdx) as x on b.brandIdx = x.brandIdx
+    left join (select max(c.couponPrice) as maxCouponPrice, c.brandIdx, c.status
+               from Coupon c where c.brandIdx = ? and c.status = 'N') as w on w.brandIdx = p.brandIdx
+    left join (select ifnull(count(r.reviewIdx), 0)               as reviewCount,
+                      round(sum(r.score) / count(r.reviewIdx), 1) as score,
+                      productIdx
+               from Review r
+               group by r.productIdx) as v on v.productIdx = p.productIdx
+    left join Store s on p.storeIdx = s.storeIdx
+where b.brandIdx = ?
+group by b.brandIdx; `;
+
+    
+  const [brandIntroRow] = await connection.query(brandIntroQuery, [userIdx, brandIdx, brandIdx, brandIdx]);
+  
+  return brandIntroRow;
+}
+
+// Get Week Best Product
+async function selectWeekBestProduct(connection, brandIdx) {
+
+  const weekBestProductQuery = `
+    select p.storeIdx,
+    p.productIdx,
+    thumbnailUrl,
+    case
+        when timestampdiff(day, p.createdAt, CURRENT_TIMESTAMP()) < 7
+            then 'Y'
+        else
+            'N' end as newFlag,
+    b.brandName,
+    productContents,
+    case
+        when productSale > 0 and zSaleFlag = 'N'
+            then concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
+        when productSale > 0 and zSaleFlag = 'Y'
+            then concat('제트할인가 ', productPrice, '\n', productSale, '% ',
+                        format(productPrice * ((100 - productSale) / 100), 0))
+        else
+            format(productPrice, 0) end as resultPrice,
+    case
+        when s.deliveryPrice = 0
+            then '무료배송'
+        else
+            '' end                      as deliveryPrice
+
+  from Brand b
+  left join Product p on p.brandIdx = b.brandIdx
+  left join Store s on p.storeIdx = s.storeIdx
+  left join ProductDetail pd on pd.productIdx = p.productIdx
+  left join Basket bs on bs.productDetailIdx = pd.productDetailIdx
+  left join ProductBasket pb on pb.productDetailIdx = bs.productDetailIdx
+  left join OrderProduct op on op.basketIdx = bs.basketIdx
+  where op.status = 'Y' and b.brandIdx = ?
+  group by p.productIdx
+  order by sum(pb.productNum) DESC
+  limit 10;
+    `;
+  const [weekBestProductRow] = await connection.query(weekBestProductQuery, brandIdx);
+  
+  return weekBestProductRow;
+}
+
+// Get CategoryIdx, CategoryName
+async function selectCategoryList(connection, brandIdx) {
+
+  const categoryListQuery = `
+  select c.categoryIdx, c.categoryName
+  from Brand b
+  left join Product p on p.brandIdx = b.brandIdx
+  left join Category c on p.categoryIdx = c.categoryIdx
+  where b.brandIdx = ?
+  group by categoryIdx;
+    `;
+  const [categoryListRow] = await connection.query(categoryListQuery, brandIdx);
+  
+  return categoryListRow;
+}
+
+// Get Brand Category Product
+async function selectBrandCategoryProduct(connection, [page, size, category, condition, brandIdx]) {
+
+  const resultQuery = `
+    select p.storeIdx,
+    p.productIdx,
+    thumbnailUrl,
+    case
+        when timestampdiff(day, p.createdAt, CURRENT_TIMESTAMP()) < 7
+            then 'Y'
+        else
+            'N' end as newFlag,
+    b.brandName,
+    productContents,
+    case
+        when productSale > 0 and zSaleFlag = 'N'
+            then concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
+        when productSale > 0 and zSaleFlag = 'Y'
+            then concat('제트할인가 ', productPrice, '\n', productSale, '% ',
+                        format(productPrice * ((100 - productSale) / 100), 0))
+        else
+            format(productPrice, 0) end as resultPrice,
+    case
+        when s.deliveryPrice = 0
+            then '무료배송'
+        else
+            '' end                      as deliveryPrice
+    from Brand b
+    left join Product p on p.brandIdx = b.brandIdx
+    left join Store s on p.storeIdx = s.storeIdx
+    left join ProductDetail pd on pd.productIdx = p.productIdx
+    left join Basket bs on bs.productDetailIdx = pd.productDetailIdx
+    left join ProductBasket pb on pb.productDetailIdx = bs.productDetailIdx
+    left join OrderProduct op on op.basketIdx = bs.basketIdx
+    left join (select count(rc.productIdx) as readCount, productIdx from ReadCount rc) as v on v.productIdx=p.productIdx
+    left join (select ifnull(count(r.reviewIdx), 0)               as reviewCount,
+                          productIdx
+                  from Review r
+                  group by r.productIdx) as w on w.productIdx = p.productIdx
+    left join Category c on c.categoryIdx = p.categoryIdx
+    where b.brandIdx = ? and p.status = 'N' and op.status = 'Y' ` + category + `
+    group by p.productIdx
+    ` + condition + `
+    limit ` + page + `, ` + size + `;
+    `;
+  const [resultRow] = await connection.query(resultQuery, [brandIdx, category, condition, page, size]);
+  
+  return resultRow;
+}
+
+// Get Brand Copun List
+async function selectBrandCoupon(connection, [brandIdx, userIdx]) {
+
+  const couponListQuery = `
+    select c.couponIdx, concat(format(c.couponPrice, 0), '원') as couponPrice, c.couponName,
+    case
+      when c.couponMin = 0
+       then '전 상품 가격 상관 없이 사용 가능'
+    else
+       concat('총 상품', format(c.couponMin, 0), '원 이상 구매 시 사용 가능') end as minPrice
+  from Brand b
+  left join Coupon c on c.brandIdx = b.brandIdx
+  where b.brandIdx = ? and c.status = 'N';
+    `;
+  const [couponListRow] = await connection.query(couponListQuery, [brandIdx]);
+  
+  return couponListRow;
+}
+
+// Get Brand Name
+async function selectBrandName(connection, brandIdx) {
+
+  const brandNameQuery = `
+  select concat(brandName, ' 쿠폰') as brandName
+  from Brand
+  where brandIdx = ?;
+    `;
+  const [brandNameRow] = await connection.query(brandNameQuery, brandIdx);
+  
+  return brandNameRow;
+}
+
+
+// HaveFlag Check
+async function haveFlag(connection, [couponIdx, userIdx]) {
+
+  const haveFlagQuery = `
+  select exists (select cu.couponIdx from Coupon c right join CouponUser cu on c.couponIdx = cu.couponIdx
+    where cu.userIdx = ? and cu.couponIdx = ?)  as exist;
+     `;
+  const [flagRow] = await connection.query(haveFlagQuery, [userIdx, couponIdx]);
+  
+  return flagRow;
+}
+
+// Insert Brand Coupon
+async function insertBrandCoupon(connection, [couponIdx, userIdx]) {
+  const insertCouponQuery = `
+    insert into CouponUser(couponIdx, userIdx)
+    values (?, ?);
+    `;
+  const [insertCouponRow] = await connection.query(insertCouponQuery, [couponIdx, userIdx]);
+
+  return insertCouponRow;
 }
 
 // Get Best Product
@@ -295,6 +516,8 @@ async function selectBestProduct(connection, [page, size, condition, ageconditio
   return bestProductRow;
 }
 
+
+
 // Get Time Sale Product
 async function selectTimeSaleProduct(connection, [page, size]) {
 
@@ -325,7 +548,7 @@ async function selectTimeSaleProduct(connection, [page, size]) {
                '브랜드' end                   as brandStatus
     from Product p
          left join Store s on s.storeIdx = p.storeIdx
-    where p.timeSale = 'Y'
+    where p.timeSale = 'Y' and p.status = 'N'
     limit ` + page + `, ` + size + `;
     `;
   const [timeSaleProductRow] = await connection.query(timeSaleProductQuery, [page, size]);
@@ -366,7 +589,7 @@ async function selectSaleProduct(connection, condition) {
     from Product p
           left join Store s on s.storeIdx = p.storeIdx
           left join Category c on c.categoryIdx = p.categoryIdx
-    where p.productSale != 0 ` + condition + `
+    where p.productSale != 0 and p.status = 'N' ` + condition + `
     order by p.productSale DESC
     limit 10;`;
   const [saleProductRow] = await connection.query(saleProductQuery, condition);
@@ -405,7 +628,7 @@ async function selectSaleNewProduct(connection, [page, size, condition]) {
   from Product p
           left join Store s on s.storeIdx = p.storeIdx
           left join Category c on c.categoryIdx = p.categoryIdx
-  where timestampdiff(day, p.createdAt, CURRENT_TIMESTAMP()) < 7 ` + condition + ` and p.productSale != 0 
+  where timestampdiff(day, p.createdAt, CURRENT_TIMESTAMP()) < 7 ` + condition + ` and p.productSale != 0 and p.status = 'N'
   limit ` + page + `, ` + size + `;  
   `;
 
@@ -444,7 +667,7 @@ async function selectNewProduct(connection, [page, size]) {
             '브랜드' end                   as brandStatus
     from Product p
         left join Store s on s.storeIdx = p.storeIdx
-    where timestampdiff(day, p.createdAt, CURRENT_TIMESTAMP()) < 7
+    where timestampdiff(day, p.createdAt, CURRENT_TIMESTAMP()) < 7 and p.status = 'N'
     limit ` + page + `, ` + size + `;
   `;
 
@@ -485,7 +708,7 @@ async function selectCateProduct(connection, [page, size, cond]) {
     from Product p
           left join Store s on s.storeIdx = p.storeIdx
           left join Category c on c.categoryIdx = p.categoryIdx
-    where ` + cond + `
+    where p.status = 'N' ` + cond + `
     limit ` + page + `, ` + size + `
     `;
   const [cateProductRow] = await connection.query(cateProductQuery, [page, size, cond]);
@@ -501,7 +724,7 @@ async function selectProductImage(connection, productIdx) {
     select productImage
     from Product p
     left join ProductImage pi on p.productIdx = pi.productIdx
-    where p.productIdx = ?;
+    where p.productIdx = ? and p.status = 'N';
   `;
 
   const [productImageRow] = await connection.query(productImageQuery, productIdx);
@@ -628,6 +851,50 @@ async function selectLastCategoryList(connection, categoryRef) {
   return categoryListRow;
 }
 
+// Get Product Coupon List
+async function selectProductCoupon(connection, [productIdx, userIdx]) {
+
+  const couponListQuery = `
+    select c.couponIdx, concat(format(c.couponPrice, 0), '원') as couponPrice, c.couponName,
+    case
+      when c.couponMin = 0
+       then '전 상품 가격 상관 없이 사용 가능'
+    else
+       concat('총 상품', format(c.couponMin, 0), '원 이상 구매 시 사용 가능') end as minPrice
+  from Product p
+  left join Coupon c on c.productIdx = p.productIdx
+  where p.productIdx = ? and p.status = 'N';
+    `;
+  const [couponListRow] = await connection.query(couponListQuery, [productIdx]);
+  
+  return couponListRow;
+}
+
+// Insert Product Coupon
+async function insertProductCoupon(connection, [couponIdx, userIdx]) {
+  const insertCouponQuery = `
+    insert into CouponUser(couponIdx, userIdx)
+    values (?, ?);
+    `;
+  const [insertCouponRow] = await connection.query(insertCouponQuery, [couponIdx, userIdx]);
+
+  return insertCouponRow;
+}
+
+// Get Store Name
+async function selectStoreName(connection, productIdx) {
+
+  const storeNameQuery = `
+  select concat(s.storeName, ' 쿠폰') as storeName
+  from Store s
+  left join Product p on s.storeIdx = p.storeIdx
+  where productIdx = ?;
+    `;
+  const [storeNameRow] = await connection.query(storeNameQuery, productIdx);
+  
+  return storeNameRow;
+}
+
 // Get Category Product
 async function selectCategoryProduct(connection, [condition, storeIdx, page, size]) {
 
@@ -659,7 +926,7 @@ async function selectCategoryProduct(connection, [condition, storeIdx, page, siz
   from Product p
          left join Store s on s.storeIdx = p.storeIdx
          left join Category c on p.categoryIdx = c.categoryIdx
-  where p.storeIdx = ? ` + condition + `
+  where p.storeIdx = ? and p.status = 'N' ` + condition + `
   limit ` + page + `, ` + size + `;
     `;
   const [categoryProductRow] = await connection.query(categoryProductQuery, [storeIdx, condition, page, size]);
@@ -715,7 +982,7 @@ async function selectRecommendationProduct(connection, storeIdx) {
                '브랜드' end                   as brandStatus
     from Product p
          left join Store s on s.storeIdx = p.storeIdx
-    where s.storeIdx = ?
+    where s.storeIdx = ? and p.status = 'N'
     order by rand()
     limit 15;
     `;
@@ -900,6 +1167,14 @@ module.exports = {
     selectBrandRank,
     selectBookMarkStatus,
     selectRankBrandProduct,
+    selectBrandIntro,
+    selectWeekBestProduct,
+    selectCategoryList,
+    selectBrandCategoryProduct,
+    selectBrandCoupon,
+    selectBrandName,
+    haveFlag,
+    insertBrandCoupon,
     selectBestProduct,
     selectTimeSaleProduct,
     selectCateProduct,
@@ -916,6 +1191,9 @@ module.exports = {
     selectLastCategoryList,
     selectCategoryProduct,
     selectProductInfo,
+    selectStoreName,
+    selectProductCoupon,
+    insertProductCoupon,
     selectRecommendationProduct,
     selectBrandBookmarkStatus,
     selectStoreBookmarkStatus,
