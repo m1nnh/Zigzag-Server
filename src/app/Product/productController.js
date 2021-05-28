@@ -651,7 +651,6 @@ exports.postBrandCoupon = async function(req, res) {
 
     // Coupon Result
     const brandCouponResult = await productProvider.brandCoupon(brandIdx, userIdx);
-    console.log(brandCouponResult[0].couponIdx);
 
     if (number == 0) {
         for (var i = 0; i < brandCouponResult.length; i++) {
