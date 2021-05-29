@@ -46,7 +46,8 @@ module.exports = {
     BRANDIDX_NOT_EXIST : { "isSuccess": false, "code": 2035, "message": "해당 브랜드가 존재하지 않습니다." },
     COUPONIDX_EXIST : { "isSuccess": false, "code": 2036, "message": "해당 쿠폰이 이미 존재합니다." },
     NUMBER_ERROR_TYPE : { "isSuccess": false, "code": 2037, "message": "number 번호를 확인해주세요." },
-
+    REVIEWIDX_NOT_EXIST : { "isSuccess": false, "code": 2038, "message": "존재하지 않는 리뷰입니다." },
+    REVIEWIDX_ERROR_TYPE : { "isSuccess": false, "code": 2039, "message": "reviewIdx는 숫자만 입력이 가능합니다." },
     // Response error
     SIGNUP_REDUNDANT_EMAIL : { "isSuccess": false, "code": 3001, "message":"중복된 이메일입니다." },
     SIGNUP_REDUNDANT_PHONENUM : { "isSuccess": false, "code": 3002, "message":"중복된 휴대폰 번호입니다." },

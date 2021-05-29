@@ -13,6 +13,36 @@ const {connect} = require("http2");
 
 // Service: Create, Update, Delete 비즈니스 로직 
 
+// Insert LikeFlag
+exports.insertLikeFlag = async function (reviewIdx, userIdx, status) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const insertResult = await productDao.insertLikeFlag(connection, [reviewIdx, userIdx, status]);
+    connection.release();
+
+    return insertResult;
+}
+
+// update LikeFlag Status
+exports.updateLikeFlagStatus = async function (reviewIdx, userIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const updateResult = await productDao.updateLikeFlagStatus(connection, [reviewIdx, userIdx]);
+
+    connection.release();
+
+    return updateResult;
+}
+
+// update LikeFlag
+exports.updateLikeFlag = async function (reviewIdx, userIdx, status) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const updateResult = await productDao.updateLikeFlag(connection, [reviewIdx, userIdx, status]);
+
+    connection.release();
+
+    return updateResult;
+}
+
+
 // Insert Like
 exports.insertLike = async function (productIdx, userIdx) {
     const connection = await pool.getConnection(async (conn) => conn);
