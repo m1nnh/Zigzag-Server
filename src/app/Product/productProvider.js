@@ -41,6 +41,33 @@ exports.brandIdxCheck = async function (brandIdx) {
   return brandCheckResult;
 };
 
+// ReviewIdx Check
+exports.reviewIdxCheck = async function (reviewIdx) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const reviewCheckResult = await productDao.selectReviewIdx(connection, reviewIdx);
+  connection.release();
+
+  return reviewCheckResult;
+};
+
+// Like Reivew Check
+exports.likeReviewCheck = async function (reviewIdx, userIdx) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const likeStatusResult = await productDao.selectLikeReviewStatus(connection, [reviewIdx, userIdx]);
+  connection.release();
+
+  return likeStatusResult;
+};
+
+// LikeFlag Status Check
+exports.likeFlagStatusCheck = async function (reviewIdx, userIdx) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const likeStatusResult = await productDao.selectLikeFlagStatus(connection, [reviewIdx, userIdx]);
+  connection.release();
+
+  return likeStatusResult;
+};
+
 // Like Check
 exports.likeCheck = async function (productIdx, userIdx) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -399,15 +426,6 @@ exports.productCoupon = async function (productIdx, userIdx) {
   return productCouponResult;
 };
 
-// // Get Haveflag 
-// exports.haveFlag = async function (couponIdx, userIdx) {
-//   const connection = await pool.getConnection(async (conn) => conn);
-//   const flag = await productDao.haveFlag(connection, [couponIdx, userIdx]);
-
-//   connection.release();
-
-//   return flag;
-// };
 
 // Get Category Product
 exports.categoryProduct = async function (condition, storeIdx, page, size) {
@@ -443,4 +461,58 @@ exports.recommendationProduct= async function (storeIdx) {
   connection.release();
 
   return recommendationProductResult;
+};
+
+// Get reviewTitle
+exports.reviewTitle= async function (productIdx) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const reviewTitleResult = await productDao.selectReviewTitle(connection, productIdx);
+  connection.release();
+
+  return reviewTitleResult;
+};
+
+// Get reviewContents
+exports.reviewContents= async function (productIdx) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const reviewContentsResult = await productDao.selectReviewContents(connection, productIdx);
+  connection.release();
+
+  return reviewContentsResult;
+};
+
+// Get reviewImage
+exports.reviewImage= async function (reviewIdx) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const reviewImageResult = await productDao.selectReviewImage(connection, reviewIdx);
+  connection.release();
+
+  return reviewImageResult;
+};
+
+// Get reviewTotalTitle
+exports.reviewTotalTitle= async function (productIdx) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const reviewTitleResult = await productDao.selectReviewTotalTitle(connection, productIdx);
+  connection.release();
+
+  return reviewTitleResult;
+};
+
+// Get reviewTotalContents
+exports.totalReviewContents= async function (productIdx, page, size, condition, pcondition) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const reviewContentsResult = await productDao.selectReviewTotalContents(connection, [productIdx, page, size, condition, pcondition]);
+  connection.release();
+
+  return reviewContentsResult;
+};
+
+// Get Like Flag Review
+exports.likeFlagReview= async function (userIdx, reviewIdx) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const likeFlagResult = await productDao.selectLikeFlag(connection, [userIdx, reviewIdx]);
+  connection.release();
+
+  return likeFlagResult;
 };

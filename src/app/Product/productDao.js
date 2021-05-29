@@ -34,6 +34,34 @@ async function selectBrandIdx(connection, brandIdx) {
   return brandIdxRow;
 }
 
+// ReviewIdx Check
+async function selectReviewIdx(connection, reviewIdx) {
+  const reviewIdxQuery = `
+    select exists(select reviewIdx from Review where reviewIdx = ? and status = 'N') as exist;
+     `;
+  const [reviewIdxRow] = await connection.query(reviewIdxQuery, reviewIdx);
+  return reviewIdxRow;
+}
+
+// likeFlag Check
+async function selectLikeReviewStatus(connection, [reviewIdx, userIdx]) {
+  const likeQuery = `
+  select exists(select reviewIdx from LikeFlagReview lfr left join User u on lfr.userIdx = u.userIdx where lfr.reviewIdx = ? and lfr.userIdx = ?) as exist;
+     `;
+  const [likeRow] = await connection.query(likeQuery, [reviewIdx, userIdx]);
+  return likeRow;
+}
+
+// likeFlag Status  Check
+async function selectLikeFlagStatus(connection, [reviewIdx, userIdx]) {
+  const likeQuery = `
+  select status from LikeFlagReview where reviewIdx = ? and userIdx = ?;
+     `;
+  const [likeRow] = await connection.query(likeQuery, [reviewIdx, userIdx]);
+  return likeRow;
+}
+
+
 // like Check
 async function selectLikeStatus(connection, [productIdx, userIdx]) {
   const likeQuery = `
@@ -342,7 +370,7 @@ async function selectWeekBestProduct(connection, brandIdx) {
   left join Basket bs on bs.productDetailIdx = pd.productDetailIdx
   left join ProductBasket pb on pb.productDetailIdx = bs.productDetailIdx
   left join OrderProduct op on op.basketIdx = bs.basketIdx
-  where op.status = 'Y' and b.brandIdx = ?
+  where op.confirm = 'Y' and b.brandIdx = ?
   group by p.productIdx
   order by sum(pb.productNum) DESC
   limit 10;
@@ -408,7 +436,7 @@ async function selectBrandCategoryProduct(connection, [page, size, category, con
                   from Review r
                   group by r.productIdx) as w on w.productIdx = p.productIdx
     left join Category c on c.categoryIdx = p.categoryIdx
-    where b.brandIdx = ? and p.status = 'N' and op.status = 'Y' ` + category + `
+    where b.brandIdx = ? and p.status = 'N' and op.confirm = 'Y' ` + category + `
     group by p.productIdx
     ` + condition + `
     limit ` + page + `, ` + size + `;
@@ -991,6 +1019,253 @@ async function selectRecommendationProduct(connection, storeIdx) {
   return recommendationProductRow;
 }
 
+// Get Review Title
+async function selectReviewTitle(connection, productIdx) {
+
+  const reviewTitleQuery = `
+    select p.productIdx,
+       concat('리뷰(', count(r.reviewIdx), ')')                      as titleReviewCount,
+       concat('리뷰 ', count(r.reviewIdx))                           as reviewCount,
+       concat(round(sum(r.score) / count(r.reviewIdx), 1), ' / 5') as score,
+       concat((select rs.contents
+               from Product p
+                        left join Review r on r.productIdx = p.productIdx
+                        left join ReviewSize rs on r.sizeIdx = rs.sizeIdx
+               where p.productIdx = ?
+                 and r.status = 'N'
+               group by r.sizeIdx
+               order by count(r.sizeIdx) DESC
+               limit 1), '(', round(max(sizeCount) / sum(sizeCount) * 100, 0), '% • ',
+              max(sizeCount), '명)')                                as size,
+       concat((select rc.contents
+               from Product p
+                        left join Review r on r.productIdx = p.productIdx
+                        left join ReviewColor rc on rc.colorIdx = r.colorIdx
+               where p.productIdx = ?
+                 and r.status = 'N'
+               group by r.sizeIdx
+               order by count(r.colorIdx) DESC
+               limit 1), '(', round(max(colorCount) / sum(colorCount) * 100, 0), '% • ',
+              max(colorCount), '명)')                               as color,
+       concat((select rq.contents
+               from Product p
+                        left join Review r on r.productIdx = p.productIdx
+                        left join ReviewQuality rq on rq.qualityIdx = r.qualityIdx
+               where p.productIdx = ?
+                 and r.status = 'N'
+               group by r.qualityIdx
+               order by count(r.qualityIdx) DESC
+               limit 1), '(', round(max(qualityCount) / sum(qualityCount) * 100, 0),
+              '% • ', max(qualityCount), '명)')                     as quality
+
+  from Product p
+         left join Review r on p.productIdx = r.productIdx
+         left join (select count(r.colorIdx) as colorCount, p.productIdx, r.reviewIdx
+                    from Product p
+                             left join Review r on r.productIdx = p.productIdx
+                    where p.productIdx = ?
+                      and r.status = 'N'
+                    group by r.sizeIdx) as w on w.reviewIdx = r.reviewIdx
+         left join (select count(r.qualityIdx) as qualityCount, p.productIdx, r.reviewIdx
+                    from Product p
+                             left join Review r on r.productIdx = p.productIdx
+                    where p.productIdx = ?
+                      and r.status = 'N'
+                    group by r.qualityIdx) as x on x.reviewIdx = r.reviewIdx
+         left join (select count(r.sizeIdx) as sizeCount, p.productIdx, r.reviewIdx
+                    from Product p
+                             left join Review r on r.productIdx = p.productIdx
+                    where p.productIdx = ?
+                      and r.status = 'N'
+                    group by r.sizeIdx) as v on v.reviewIdx = r.reviewIdx
+  where p.productIdx = ?;
+    `;
+  const [reviewTitleRow] = await connection.query(reviewTitleQuery, [productIdx, productIdx, productIdx, productIdx, productIdx, productIdx, productIdx]);
+
+  return reviewTitleRow;
+}
+
+// Get Review Contents
+async function selectReviewContents(connection, productIdx) {
+
+  const reviewContentsQuery = `
+    select r.reviewIdx,
+        u.nickName,
+        date_format(r.createdAt, '%y.%m.%d') as createdAt,
+        r.score                              as score,
+        rs.contents                          as size,
+        rc.contents                          as color,
+        rq.contents                          as quality,
+        concat(colorName, ' / ', sizeName)    as productOption,
+        r.reviewContents
+  from Product p
+          left join Review r
+                    on p.productIdx = r.productIdx
+          left join ReviewQuality rq on rq.qualityIdx = r.qualityIdx
+          left join ReviewSize rs on rs.sizeIdx = r.sizeIdx
+          left join ReviewColor rc on rc.colorIdx = r.colorIdx
+          left join OrderProduct op on op.orderIdx = r.orderIdx
+          left join Basket b on op.basketIdx = b.basketIdx
+          left join ProductBasket pb on b.productDetailIdx = pb.productDetailIdx
+          left join ProductDetail pd on pd.productDetailIdx = pb.productDetailIdx
+          left join Size s on s.sizeIdx = pd.sizeIdx
+          left join Color c on pd.colorIdx = c.colorIdx
+          left join User u on r.userIdx = u.userIdx
+    where p.productIdx = ?
+    and r.status = 'N' and op.confirm = 'Y'
+    group by u.userIdx
+    order by r.createdAt
+    limit 5;
+    `;
+  const [reviewContentsRow] = await connection.query(reviewContentsQuery, productIdx);
+
+  return reviewContentsRow;
+}
+
+// Get Review Contents
+async function selectReviewImage(connection, reviewIdx) {
+
+  const reviewImageQuery = `
+    select reviewImage
+    from Product p
+            left join Review r on p.productIdx = r.productIdx
+            left join ReviewImage ri on ri.reviewIdx = r.reviewIdx
+    where r.reviewIdx = ?
+      and r.status = 'N';
+    `;
+  const [reviewImageRow] = await connection.query(reviewImageQuery, reviewIdx);
+
+  return reviewImageRow;
+}
+
+// Get Review Total Title
+async function selectReviewTotalTitle(connection, productIdx) {
+
+  const reviewTitleQuery = `
+    select p.productIdx,
+       concat('Z리뷰 ', count(r.reviewIdx))                      as titleReviewCount,
+       concat(round(sum(r.score) / count(r.reviewIdx), 1), ' / 5') as score,
+       concat((select rs.contents
+               from Product p
+                        left join Review r on r.productIdx = p.productIdx
+                        left join ReviewSize rs on r.sizeIdx = rs.sizeIdx
+               where p.productIdx = ?
+                 and r.status = 'N'
+               group by r.sizeIdx
+               order by count(r.sizeIdx) DESC
+               limit 1), '(', round(max(sizeCount) / sum(sizeCount) * 100, 0), '% • ',
+              max(sizeCount), '명)')                                as size,
+       concat((select rc.contents
+               from Product p
+                        left join Review r on r.productIdx = p.productIdx
+                        left join ReviewColor rc on rc.colorIdx = r.colorIdx
+               where p.productIdx = ?
+                 and r.status = 'N'
+               group by r.sizeIdx
+               order by count(r.colorIdx) DESC
+               limit 1), '(', round(max(colorCount) / sum(colorCount) * 100, 0), '% • ',
+              max(colorCount), '명)')                               as color,
+       concat((select rq.contents
+               from Product p
+                        left join Review r on r.productIdx = p.productIdx
+                        left join ReviewQuality rq on rq.qualityIdx = r.qualityIdx
+               where p.productIdx = ?
+                 and r.status = 'N'
+               group by r.qualityIdx
+               order by count(r.qualityIdx) DESC
+               limit 1), '(', round(max(qualityCount) / sum(qualityCount) * 100, 0),
+              '% • ', max(qualityCount), '명)')                     as quality,
+              concat('전체 리뷰 ', count(r.reviewIdx))                           as reviewCount,
+              (select count(r.reviewIdx) from Product p left join Review r on p.productIdx = r.productIdx where imageFlag = 'N' and p.productIdx = ?) as photoCount
+
+  from Product p
+         left join Review r on p.productIdx = r.productIdx
+         left join (select count(r.colorIdx) as colorCount, p.productIdx, r.reviewIdx
+                    from Product p
+                             left join Review r on r.productIdx = p.productIdx
+                    where p.productIdx = ?
+                      and r.status = 'N'
+                    group by r.sizeIdx) as w on w.reviewIdx = r.reviewIdx
+         left join (select count(r.qualityIdx) as qualityCount, p.productIdx, r.reviewIdx
+                    from Product p
+                             left join Review r on r.productIdx = p.productIdx
+                    where p.productIdx = ?
+                      and r.status = 'N'
+                    group by r.qualityIdx) as x on x.reviewIdx = r.reviewIdx
+         left join (select count(r.sizeIdx) as sizeCount, p.productIdx, r.reviewIdx
+                    from Product p
+                             left join Review r on r.productIdx = p.productIdx
+                    where p.productIdx = ?
+                      and r.status = 'N'
+                    group by r.sizeIdx) as v on v.reviewIdx = r.reviewIdx
+  where p.productIdx = ?;
+    `;
+  const [reviewTitleRow] = await connection.query(reviewTitleQuery, [productIdx, productIdx, productIdx, productIdx, productIdx, productIdx, productIdx, productIdx]);
+
+  return reviewTitleRow;
+}
+
+// Get Total Review Contents
+async function selectReviewTotalContents(connection, [productIdx, page, size, condition, pcondition]) {
+  const reviewContentsQuery = `
+    select r.reviewIdx,
+    u.nickName,
+    date_format(r.createdAt, '%y.%m.%d')                                               as createdAt,
+    r.score                                                                            as score,
+    concat(colorName, ' / ', sizeName)                                                 as choiceOption,
+    concat('사이즈 "', rs.contents, '", 색감 "', rc.contents, '", 퀄리티 "', rq.contents, '"') as oneLine,
+    r.reviewContents,
+    ifnull(likeCount, 0)                                                               as likeCount,
+    ifnull(hateCount, 0)                                                               as hateCount
+    from Product p
+      left join Review r
+                on p.productIdx = r.productIdx
+      left join (select ifnull(count(lfr.reviewIdx), 0) as likeCount, lfr.reviewIdx
+                from LikeFlagReview lfr
+                where lfr.likeFlag = 'Y'
+                group by lfr.reviewIdx) as v on r.reviewIdx = v.reviewIdx
+      left join (select ifnull(count(lfr.reviewIdx), 0) as hateCount, lfr.reviewIdx
+                from LikeFlagReview lfr
+                where lfr.likeFlag = 'N'
+                group by lfr.reviewIdx) as w on r.reviewIdx = w.reviewIdx
+      left join ReviewQuality rq on rq.qualityIdx = r.qualityIdx
+      left join ReviewSize rs on rs.sizeIdx = r.sizeIdx
+      left join ReviewColor rc on rc.colorIdx = r.colorIdx
+      left join OrderProduct op on op.orderIdx = r.orderIdx
+      left join Basket b on op.basketIdx = b.basketIdx
+      left join ProductBasket pb on b.productDetailIdx = pb.productDetailIdx
+      left join ProductDetail pd on pd.productDetailIdx = pb.productDetailIdx
+      left join Size s on s.sizeIdx = pd.sizeIdx
+      left join Color c on pd.colorIdx = c.colorIdx
+      left join User u on r.userIdx = u.userIdx
+    where p.productIdx = ?
+    and r.status = 'N' 
+     and op.status = 'Y' ` + pcondition + `
+    group by u.userIdx
+    ` + condition + `
+    limit ` + page + `, ` + size + `;
+    `;
+  const [reviewContentsRow] = await connection.query(reviewContentsQuery, [productIdx, page, size, condition, pcondition]);
+
+  return reviewContentsRow;
+}
+
+// Get Like Flag Review
+async function selectLikeFlag(connection, [userIdx, reviewIdx]) {
+
+  const likeFlagQuery = `
+    select likeFlag
+    from Review r
+    left join LikeFlagReview lf on lf.reviewIdx = r.reviewIdx
+    left join User u on u.userIdx = lf.userIdx
+    where u.userIdx = ? and lf.status = 'N' and r.reviewIdx = ?
+    `;
+  const [likeFlagRow] = await connection.query(likeFlagQuery, [userIdx, reviewIdx]);
+
+  return likeFlagRow;
+}
+
+
 // Insert Product Like
 async function insertLike(connection, [productIdx, userIdx]) {
 
@@ -1067,10 +1342,52 @@ async function updateBrand(connection, [brandIdx, userIdx, status]) {
   return updateBookmarkRow;
 }
 
+// Insert LikeFlag
+async function insertLikeFlag(connection, [reviewIdx, userIdx, status]) {
+
+  const insertLikeFlagQuery = `
+    insert into LikeFlagReview(reviewIdx, userIdx, likeFlag)
+    values (?, ?, ?);
+    `;
+  const [insertLikeFlagRow] = await connection.query(insertLikeFlagQuery, [reviewIdx, userIdx, status]);
+
+  return insertLikeFlagRow;
+}
+
+
+// Update LikeFlag
+async function updateLikeFlag(connection, [reviewIdx, userIdx, status]) {
+
+  const updateLikeFlagQuery = `
+    update LikeFlagReview
+    set likeFlag = ?
+    where reviewIdx = ? and userIdx = ?;
+    `;
+  const [updateLikeFlagRow] = await connection.query(updateLikeFlagQuery, [status, reviewIdx, userIdx]);
+
+  return updateLikeFlagRow;
+}
+
+// Update LikeFlag
+async function updateLikeFlagStatus(connection, [reviewIdx, userIdx]) {
+
+  const updateLikeFlagQuery = `
+    update LikeFlagReview
+    set status = 'N'
+    where reviewIdx = ? and userIdx = ?;
+    `;
+  const [updateLikeFlagRow] = await connection.query(updateLikeFlagQuery, [reviewIdx, userIdx]);
+
+  return updateLikeFlagRow;
+}
+
+
 module.exports = {
     selectHomeProduct,
     selectLikeProductStatus,
     selectUserIdx,
+    selectReviewIdx,
+    selectLikeReviewStatus,
     selectStoreIdx,
     selectProductIdx,
     selectBrandIdx,
@@ -1116,6 +1433,16 @@ module.exports = {
     updateLike,
     updateStore,
     updateBrand,
-    selectHomeSlideProduct
+    selectHomeSlideProduct,
+    selectReviewTitle,
+    selectReviewContents,
+    selectReviewImage,
+    selectReviewTotalTitle,
+    selectReviewTotalContents,
+    selectLikeFlag,
+    updateLikeFlag,
+    insertLikeFlag,
+    selectLikeFlagStatus,
+    updateLikeFlagStatus
   };
   
