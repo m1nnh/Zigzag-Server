@@ -48,6 +48,10 @@ module.exports = {
     NUMBER_ERROR_TYPE : { "isSuccess": false, "code": 2037, "message": "number 번호를 확인해주세요." },
     REVIEWIDX_NOT_EXIST : { "isSuccess": false, "code": 2038, "message": "존재하지 않는 리뷰입니다." },
     REVIEWIDX_ERROR_TYPE : { "isSuccess": false, "code": 2039, "message": "reviewIdx는 숫자만 입력이 가능합니다." },
+    STORYURL_EMPTY : { "isSuccess": false, "code": 2040, "message": "storyUrl을 입력해주세요." },
+    STORYURL_ERROR_TYPE: { "isSuccess": false, "code": 2041, "message": "잘못된 형식의 url입니다." },
+    STORYIDX_NOT_EXIST : { "isSuccess": false, "code": 2042, "message": "존재하지 않는 스토리입니다." },
+    STORYIDX_ONLY_NUMBER : { "isSuccess": false, "code": 2043, "message": "storyIdx는 숫자만 입력이 가능합니다." },
     // Response error
     SIGNUP_REDUNDANT_EMAIL : { "isSuccess": false, "code": 3001, "message":"중복된 이메일입니다." },
     SIGNUP_REDUNDANT_PHONENUM : { "isSuccess": false, "code": 3002, "message":"중복된 휴대폰 번호입니다." },

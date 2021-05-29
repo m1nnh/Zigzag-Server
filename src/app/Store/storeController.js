@@ -13,6 +13,7 @@ const { SUCCESS } = require("../../../config/baseResponseStatus");
 const regPage = /^[0-9]/g;
 const regSize = /^[0-9]/g;
 const regNum = /^[0-9]/g;
+const regUrl = /(http(s)?:\/\/)([a-z0-9\w]+\.*)+[a-z0-9]{2,4}/gi;
 
 /**
  * API No. 
@@ -72,3 +73,173 @@ exports.patchStoreBookmark = async function (req, res) {
     return res.send(response(baseResponse.SUCCESS));
 
  }
+
+ /**
+ * API No. 
+ * API Name : 스토어 스토리 생성 API
+ * [POST] /stores/:storeIdx/story
+ */
+exports.postStory = async function (req, res) {
+
+    // Request Token
+    const userIdx = req.verifiedToken.userIdx;
+
+    // Request Path Variable
+    let {storeIdx} = req.params;
+    
+    // Request Body
+    const {bodyIdx, storyUrl} = req.body;
+
+    // Validation Check (Request Error)
+    if (!userIdx | !bodyIdx) 
+        return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
+
+    if (userIdx !== parseInt(bodyIdx))
+        return res.send(errResponse(baseResponse.ID_NOT_MATCHING)); // 2020 : userId가 다릅니다.
+
+    const checkUserIdx = await productProvider.userCheck(userIdx);
+
+    if (checkUserIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
+
+    if (!regNum.test(storeIdx) & storeIdx < 1)
+        return res.send(response(baseResponse.STOREIDX_ONLY_NUMBER)); // 2030 : storeIdx는 숫자만 입력이 가능합니다.
+  
+    const checkStoreIdx = await productProvider.storeCheck(storeIdx);
+
+    if (checkStoreIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.STOREIDX_NOT_EXIST)) // 2029 : 존재하지 않는 쇼핑몰입니다.
+
+    if (!storyUrl)
+        return res.send(errResponse(baseResponse.STORYURL_EMPTY)); // 2040 : storyUrl을 입력해주세요.
+
+
+    if (regUrl.test(storyUrl) == false)
+        return res.send(errResponse(baseResponse.STORYURL_ERROR_TYPE)); // 2041 : 잘못된 형식의 url입니다.
+    
+
+    
+    const storeStory = await storeService.postStoreStory(storeIdx, storyUrl);
+    
+    return res.send(response(baseResponse.SUCCESS, storeStory));
+
+ }
+
+ /**
+ * API No. 
+ * API Name : 스토어 스토리 생성 API
+ * [GET] /stores/:storyIdx/first-story
+ */
+exports.getFirstStory = async function (req, res) {
+
+    // Request Token
+    const userIdx = req.verifiedToken.userIdx;
+
+    // Request Path Variable
+    let {storeIdx} = req.params;
+    
+    // Request Body
+    const {bodyIdx} = req.body;
+
+    // Validation Check (Request Error)
+    if (!userIdx | !bodyIdx) 
+        return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
+
+    if (userIdx !== parseInt(bodyIdx))
+        return res.send(errResponse(baseResponse.ID_NOT_MATCHING)); // 2020 : userId가 다릅니다.
+
+    const checkUserIdx = await productProvider.userCheck(userIdx);
+
+    if (checkUserIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
+
+    if (!regNum.test(storeIdx) & storeIdx < 1)
+        return res.send(response(baseResponse.STOREIDX_ONLY_NUMBER)); // 2030 : storeIdx는 숫자만 입력이 가능합니다.
+
+    const checkStoreIdx = await productProvider.storeCheck(storeIdx);
+
+    if (checkStoreIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.STOREIDX_NOT_EXIST)) // 2029 : 존재하지 않는 쇼핑몰입니다.
+    
+    const checkStoryIdx = await storeProvider.storeStoryIdxCheck(storeIdx);
+
+    if (checkStoryIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.STORYIDX_NOT_EXIST)) // 2042 : 존재하지 않는 스토리입니다.
+
+    const storeStory = await storeProvider.getStoreStory(storeIdx, userIdx);
+
+    return res.send(response(baseResponse.SUCCESS, storeStory));
+
+ }
+
+ /**
+ * API No. 
+ * API Name : 특정 스토리 조회 API
+ * [GET] /storys/:storyIdx
+ */
+exports.getStory = async function (req, res) {
+
+    // Request Token
+    const userIdx = req.verifiedToken.userIdx;
+
+    // Request Path Variable
+    let {storyIdx} = req.params;
+    
+    // Request Body
+    const {bodyIdx} = req.body;
+
+    // Validation Check (Request Error)
+    if (!userIdx | !bodyIdx) 
+        return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
+
+    if (userIdx !== parseInt(bodyIdx))
+        return res.send(errResponse(baseResponse.ID_NOT_MATCHING)); // 2020 : userId가 다릅니다.
+
+    const checkUserIdx = await productProvider.userCheck(userIdx);
+
+    if (checkUserIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
+
+    if (!regNum.test(storyIdx) & storyIdx < 1)
+        return res.send(response(baseResponse.STORYIDX_ONLY_NUMBER)); // 2043 : storyIdx는 숫자만 입력이 가능합니다.
+
+    const checkStoryIdx = await storeProvider.storyIdxCheck(storyIdx);
+
+    if (checkStoryIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.STORYIDX_NOT_EXIST)) // 2042 : 존재하지 않는 스토리입니다.
+
+    const storeStory = await storeProvider.getStory(storyIdx, userIdx);
+
+    return res.send(response(baseResponse.SUCCESS, storeStory));
+}
+
+/**
+ * API No. 
+ * API Name : 북마크 스토어 스토리 목록 조회 API
+ * [GET] /storys/book-mark-store
+ */
+exports.getStoryList = async function (req, res) {
+
+    // Request Token
+    const userIdx = req.verifiedToken.userIdx;
+  
+    // Request Body
+    const {bodyIdx} = req.body;
+
+    // Validation Check (Request Error)
+    if (!userIdx | !bodyIdx) 
+        return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
+
+    if (userIdx !== parseInt(bodyIdx))
+        return res.send(errResponse(baseResponse.ID_NOT_MATCHING)); // 2020 : userId가 다릅니다.
+
+    const checkUserIdx = await productProvider.userCheck(userIdx);
+
+    if (checkUserIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
+
+    const storyList = await storeProvider.getStoryList(userIdx);
+
+    return res.send(response(baseResponse.SUCCESS, storyList));
+
+}
