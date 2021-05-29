@@ -56,15 +56,6 @@ module.exports = function(app){
     // API No. ? 스토어별 추천 상품 조회 API
     app.get('/products/:storeIdx/recommendation', jwtMiddleware, product.getProductRecommendation);
 
-    // API No. ? 상품별 메인 리뷰 조회 API
-    app.get('/products/:productIdx/main-review', jwtMiddleware, product.getMainReview);
-
-    // API No. ? 상품별 토탈 리뷰 타이틀 조회 API
-    app.get('/products/:productIdx/total-review-title', jwtMiddleware, product.getTotalReviewTitle);
-
-    // API No. ? 상품별 토탈 리뷰 조회 API
-    app.get('/products/:productIdx/total-review', jwtMiddleware, product.getTotalReview);
-
     // API No. ? 찜 상품 수정 API
     app.patch('/products/:productIdx/like', jwtMiddleware, product.patchLike);
 
