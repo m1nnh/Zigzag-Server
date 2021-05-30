@@ -243,3 +243,129 @@ exports.getStoryList = async function (req, res) {
     return res.send(response(baseResponse.SUCCESS, storyList));
 
 }
+
+/**
+ * API No. 
+ * API Name : 스토어 전체 랭킹 조회 API
+ * [GET] /stores/total-rank
+ */
+
+exports.getTotalRank = async function(req, res) {
+
+    // Request Token
+    const userIdx = req.verifiedToken.userIdx;
+
+    // Request Query String
+    let {page, size, large} = req.query;
+
+    // Request Body
+    const bodyIdx = req.body;
+
+    condition = ''
+
+    // Validation Check (Request Error)
+    if (!userIdx | !bodyIdx) 
+        return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
+
+    if (userIdx !== parseInt(bodyIdx.bodyIdx))
+        return res.send(errResponse(baseResponse.ID_NOT_MATCHING)); // 2020 : userId가 다릅니다.
+
+    const checkUserIdx = await productProvider.userCheck(userIdx);
+
+    if (checkUserIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
+
+    if (!page)
+        return res.send(response(baseResponse.PAGE_EMPTY)); // 2012 : page를 입력해주세요.
+    
+    if (!regPage.test(page) & page < 1) 
+        return res.send(response(baseResponse.PAGE_ERROR_TYPE)); // 2013 : page 번호를 확인해주세요.
+
+    if (!size) 
+        return res.send(response(baseResponse.SIZE_EMPTY)); // 2014 : size를 입력해주세요.
+
+    if (!regSize.test(size) & size < 1) 
+        return res.send(response(baseResponse.SIZE_ERROR_TYPE)); // 2015 : size 번호를 확인해주세요.
+    
+    // Category Filtering
+    if (large) {
+        if (large == 1) {
+            large = parseInt(large) + 1
+            var firstCategoryIdxRow = await productProvider.categoryIdx(large);
+            large = parseInt(large) + 5
+            let first = firstCategoryIdxRow[1].categoryIdx;
+
+            var secondCategoryIdxRow = await productProvider.categoryIdx(large);
+            let last = secondCategoryIdxRow[secondCategoryIdxRow.length - 1].categoryIdx;
+
+            condition += 'and categoryRef between ' + first + ' and ' + last
+        }
+
+        else if (large == 2) {
+            large = parseInt(large) + 6
+            var categoryIdxRow = await productProvider.categoryIdx(large);
+            let first = categoryIdxRow[1].categoryIdx;
+            let last = categoryIdxRow[categoryIdxRow.length - 1].categoryIdx;
+
+            condition += 'and categoryRef between ' + first + ' and ' + last;
+        }
+
+        else if (large == 3) {
+            large = parseInt(large) + 4
+            var categoryIdxRow = await productProvider.categoryIdx(large);
+            let first = categoryIdxRow[1].categoryIdx;
+            let last = categoryIdxRow[categoryIdxRow.length - 1].categoryIdx;
+
+            condition = 'and categoryRef between ' + first + ' and ' + last;
+        }
+
+        else if (large == 4) {
+            large = parseInt(large) + 8
+            var categoryIdxRow = await productProvider.categoryIdx(large);
+            let first = categoryIdxRow[1].categoryIdx;
+            let last = categoryIdxRow[categoryIdxRow.length - 1].categoryIdx;
+
+            condition = 'and categoryRef between ' + first + ' and ' + last;
+        }
+
+        else if (large == 5) {
+            large = parseInt(large) + 4
+            var categoryIdxRow = await productProvider.categoryIdx(large);
+            let first = categoryIdxRow[1].categoryIdx;
+            let last = categoryIdxRow[categoryIdxRow.length - 1].categoryIdx;
+
+            condition = 'and categoryRef between ' + first + ' and ' + last;
+        }
+
+        else if (large == 6) {
+            large = parseInt(large) + 5
+            var categoryIdxRow = await productProvider.categoryIdx(large);
+            let first = categoryIdxRow[1].categoryIdx;
+            let last = categoryIdxRow[categoryIdxRow.length - 1].categoryIdx;
+
+            condition = 'and categoryRef between ' + first + ' and ' + last;
+        }
+
+        else if (large == 7) {
+            large = parseInt(large) + 3
+            var categoryIdxRow = await productProvider.categoryIdx(large);
+            let first = categoryIdxRow[1].categoryIdx;
+            let last = categoryIdxRow[categoryIdxRow.length - 1].categoryIdx;
+
+            condition = 'and categoryRef between ' + first + ' and ' + last;
+        }
+
+        else 
+            return res.send(errResponse(baseResponse.LARGE_ERROR_TYPE)); // 2024 : large 번호를 확인해주세요.
+    }
+    else
+        condition = ''
+
+    page = size * (page-1);
+
+    // rank Result
+    let rankStore = await storeProvider.getRankStore(userIdx, condition, page, size);
+
+    return res.send(response(baseResponse.SUCCESS, rankStore));
+
+ }

@@ -14,4 +14,10 @@ module.exports = function(app){
     // API No. ? 브랜드 북마크 수정 API
     app.patch('/brands/:brandIdx/book-mark', jwtMiddleware, brand.patchBrandBookmark);
 
+    // API No. ? 브랜드 토탈 랭킹 조회 API
+    app.get('/brands/total-rank', jwtMiddleware, brand.getTotalRank);
+
+    // API No. ? 신규 입점 브랜드 조회 API (30일 기준)
+    app.get('/brands/new', jwtMiddleware, brand.getBrandNew);
+
 };

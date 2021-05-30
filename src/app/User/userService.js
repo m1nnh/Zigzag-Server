@@ -74,6 +74,16 @@ exports.postSignIn = async function (email, password) {
     }
 }
 
+// Logout
+exports.logout = async function (userIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const logoutResult = await userDao.userLogout(connection, userIdx);
+
+    connection.release();
+
+    return logoutResult;
+}
+
 // Patch All
 exports.editUser = async function (userPhoneNum, userName, userIdx) {
     const connection = await pool.getConnection(async (conn) => conn);

@@ -16,5 +16,8 @@ module.exports = function(app){
 
     // API No. ? 북마크 스토어 스토리 목록 조회 API
     app.get('/storys/book-mark/store', jwtMiddleware, store.getStoryList);
+
+    // API No. ? 스토어 전체 랭킹 조회 API
+    app.get('/stores/total-rank', jwtMiddleware, store.getTotalRank);
     
 };

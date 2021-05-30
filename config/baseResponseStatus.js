@@ -52,6 +52,10 @@ module.exports = {
     STORYURL_ERROR_TYPE: { "isSuccess": false, "code": 2041, "message": "잘못된 형식의 url입니다." },
     STORYIDX_NOT_EXIST : { "isSuccess": false, "code": 2042, "message": "존재하지 않는 스토리입니다." },
     STORYIDX_ONLY_NUMBER : { "isSuccess": false, "code": 2043, "message": "storyIdx는 숫자만 입력이 가능합니다." },
+    CONTENTS_EMPTY : { "isSuccess": false, "code": 2044, "message": "검색 내용을 입력해주세요." },
+    DELETE_CONTENTS_NOT_EXIST : { "isSuccess": false, "code": 2045, "message": "삭제할 검색 내용이 없습니다." },
+    DUPLICATE_LARGE_AGEFILTER : { "isSuccess": false, "code": 2046, "message": "카테고리 분류 숫자, 나이 필터링 숫자를 동시에 입력할 수 없습니다." },
+
     // Response error
     SIGNUP_REDUNDANT_EMAIL : { "isSuccess": false, "code": 3001, "message":"중복된 이메일입니다." },
     SIGNUP_REDUNDANT_PHONENUM : { "isSuccess": false, "code": 3002, "message":"중복된 휴대폰 번호입니다." },
