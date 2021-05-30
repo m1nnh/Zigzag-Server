@@ -4,7 +4,7 @@ const userService = require("../../app/User/userService");
 const productProvider = require("../../app/Product/productProvider");
 const baseResponse = require("../../../config/baseResponseStatus");
 const {response, errResponse} = require("../../../config/response");
-
+const smtpTransport = require('../../../config/email'); 
 
 const {emit} = require("nodemon");
 const crypto = require("crypto");
@@ -14,6 +14,27 @@ const regEmail = /^([\w_\.\-\+])+\@([\w\-]+\.)+([\w]{2,10})+$/;
 const regPassword = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,16}/;
 const regPhoneNum = /^\d{3}\d{3,4}\d{4}$/;
 const regUserName = /^[가-힣]{2,4}$/;
+
+
+exports.findPassword = async function (req, res) { 
+
+    const {email} = req.body;
+
+    const emailOptions = { from: "alsgur961010@gmai.com", to: email, 
+    
+    subject: "임시비밀번호 발급입니다.", text: "임시비밀번호 : wwqedfasvccvxz" }; 
+
+    await smtpTransport.sendMail(emailOptions, (err, response) => 
+    { if (err) { 
+        smtpTransport.close();
+        return errResponse(baseResponse.DB_ERROR) 
+    } else { 
+        console.log(123243);
+        smtpTransport.close();
+        console.log(123243);
+        return res.send(response(baseResponse.SUCCESS));
+    } }) 
+};
 
 /**
  * API No. 
@@ -121,6 +142,38 @@ exports.loginUser = async function (req, res) {
 
 /**
  * API No. 
+ * API Name : 로그아웃 API
+ * [GET] /users/logout
+ */
+exports.logout = async function (req, res) {
+
+    // Request JWT Token
+    const userIdx = req.verifiedToken.userIdx;
+
+    // Request body
+    const {bodyIdx} = req.body;
+
+    // Validation Check (Request Error)
+    if (!userIdx | !bodyIdx) 
+        return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
+    
+    if (userIdx !== bodyIdx)
+        return res.send(errResponse(baseResponse.ID_NOT_MATCHING)); // 2020 : userId가 다릅니다.
+
+    const checkUserIdx = await productProvider.userCheck(userIdx);
+
+    if (checkUserIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)); // 2017 : 해당 회원이 존재하지 않습니다.
+    // Result
+    await userService.logout(userIdx);
+
+    return res.send(response(baseResponse.SUCCESS));
+
+};
+
+
+/**
+ * API No. 
  * API Name : 회원정보 수정 API
  * [PATCH] /users
  */
@@ -184,15 +237,3 @@ exports.patchUsers = async function (req, res) {
     
 }
 
-/**
- * API No. 
- * API Name : 앱 푸시 변경 API
- * [PATCH] /users/:userIdx/flagSetting
- */
-
-
- /**
- * API No. 
- * API Name : 환불 계좌 변경 API
- * [PATCH] /users/:userIdx/rePayAccount
- */

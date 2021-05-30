@@ -157,6 +157,17 @@ exports.brandRank = async function (condition) {
 };
 
 
+// Get Total Rank
+exports.brandTotalRank = async function (page, size, condition) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const brandRankResult = await productDao.selectBrandTotalRank(connection, [page, size, condition]);
+
+  connection.release();
+
+  return brandRankResult;
+};
+
+
 // Get Brand Intro
 exports.brandIntro = async function (brandIdx, userIdx) {
   const connection = await pool.getConnection(async (conn) => conn);

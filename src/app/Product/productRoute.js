@@ -11,8 +11,11 @@ module.exports = function(app){
     // API No. ? 브랜드 상품 조회 API
     app.get('/products/brand', jwtMiddleware, product.getBrand);
    
-    // API No. ? 랭킹별 브랜드 상품 조회 API
-    app.get('/products/brand-rank', jwtMiddleware, product.getBrandRank);
+    // API No. ? Top3 브랜드 상품 조회 API
+    app.get('/products/top3-brand', jwtMiddleware, product.getBrandRank);
+
+    // API No. ? 전체 브랜드 랭킹별 상품 조회 API
+    app.get('/products/rank-brand', jwtMiddleware, product.getTotalRank)
 
     // API No. ? 브랜드별 이번 주 베스트 상품 조회 API
     app.get('/products/:brandIdx/week-best', jwtMiddleware, product.getWeekBest);

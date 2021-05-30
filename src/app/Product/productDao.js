@@ -252,6 +252,27 @@ async function selectBrandRank(connection, condition) {
   return brandRankRow;
 }
 
+// Get Brand TotalRank
+async function selectBrandTotalRank(connection, [page, size, condition]) {
+
+  const brandRankQuery = `
+    select b.brandIdx, b.brandUrl, b.brandName
+    from Brand b
+            left join Product p on p.brandIdx = b.brandIdx
+            left join ReadCount rc on rc.productIdx = p.productIdx
+            left join Category c on p.categoryIdx = c.categoryIdx
+    where b.status = 'N' `+ condition +`
+    group by brandIdx
+    order by ifnull(count(rc.productIdx),0) DESC
+    limit ` + page + `, ` + size + `;
+  `;
+    
+  const [brandRankRow] = await connection.query(brandRankQuery, [page, size, condition]);
+
+  return brandRankRow;
+}
+
+
 // Get BookMark Brand Status
 async function selectBookMarkStatus(connection, userIdx) {
 
@@ -337,7 +358,7 @@ group by b.brandIdx; `;
 
 // Get Week Best Product
 async function selectWeekBestProduct(connection, brandIdx) {
-
+  console.log(1);
   const weekBestProductQuery = `
     select p.storeIdx,
     p.productIdx,
@@ -367,8 +388,8 @@ async function selectWeekBestProduct(connection, brandIdx) {
   left join Product p on p.brandIdx = b.brandIdx
   left join Store s on p.storeIdx = s.storeIdx
   left join ProductDetail pd on pd.productIdx = p.productIdx
-  left join Basket bs on bs.productDetailIdx = pd.productDetailIdx
-  left join ProductBasket pb on pb.productDetailIdx = bs.productDetailIdx
+  left join ProductBasket pb on pb.productDetailIdx = pd.productDetailIdx
+  left join Basket bs on bs.basketIdx = pb.basketIdx
   left join OrderProduct op on op.basketIdx = bs.basketIdx
   where op.confirm = 'Y' and b.brandIdx = ?
   group by p.productIdx
@@ -427,8 +448,8 @@ async function selectBrandCategoryProduct(connection, [page, size, category, con
     left join Product p on p.brandIdx = b.brandIdx
     left join Store s on p.storeIdx = s.storeIdx
     left join ProductDetail pd on pd.productIdx = p.productIdx
-    left join Basket bs on bs.productDetailIdx = pd.productDetailIdx
-    left join ProductBasket pb on pb.productDetailIdx = bs.productDetailIdx
+    left join ProductBasket pb on pb.productDetailIdx = pd.productDetailIdx
+    left join Basket bs on bs.basketIdx = pb.basketIdx
     left join OrderProduct op on op.basketIdx = bs.basketIdx
     left join (select count(rc.productIdx) as readCount, productIdx from ReadCount rc) as v on v.productIdx=p.productIdx
     left join (select ifnull(count(r.reviewIdx), 0)               as reviewCount,
@@ -1394,6 +1415,7 @@ module.exports = {
     selectBrandProduct,
     selectCategoryIdx,
     selectBrandRank,
+    selectBrandTotalRank,
     selectBookMarkStatus,
     selectRankBrandProduct,
     selectBrandIntro,

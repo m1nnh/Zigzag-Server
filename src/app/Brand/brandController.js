@@ -248,3 +248,88 @@ exports.patchBrandBookmark = async function (req, res) {
     return res.send(response(baseResponse.SUCCESS));
 
  }
+
+ /**
+ * API No. 
+ * API Name : 브랜드 전체 랭킹 조회 API
+ * [GET] /brands/total-rank
+ */
+
+exports.getTotalRank = async function(req, res) {
+
+    // Request Token
+    const userIdx = req.verifiedToken.userIdx;
+
+    // Request Query String
+    let {page, size} = req.query;
+
+    // Request Body
+    const bodyIdx = req.body;
+
+    // Validation Check (Request Error)
+    if (!userIdx | !bodyIdx) 
+        return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
+
+    if (userIdx !== parseInt(bodyIdx.bodyIdx))
+        return res.send(errResponse(baseResponse.ID_NOT_MATCHING)); // 2020 : userId가 다릅니다.
+
+    const checkUserIdx = await productProvider.userCheck(userIdx);
+
+    if (checkUserIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
+
+    if (!page)
+        return res.send(response(baseResponse.PAGE_EMPTY)); // 2012 : page를 입력해주세요.
+    
+    if (!regPage.test(page) & page < 1) 
+        return res.send(response(baseResponse.PAGE_ERROR_TYPE)); // 2013 : page 번호를 확인해주세요.
+
+    if (!size) 
+        return res.send(response(baseResponse.SIZE_EMPTY)); // 2014 : size를 입력해주세요.
+
+    if (!regSize.test(size) & size < 1) 
+        return res.send(response(baseResponse.SIZE_ERROR_TYPE)); // 2015 : size 번호를 확인해주세요.
+    
+    page = size * (page-1);
+
+    // rank Result
+    let rankBrand = await brandProvider.getRankBrand(userIdx, page, size);
+
+    return res.send(response(baseResponse.SUCCESS, rankBrand));
+
+ }
+
+
+ /**
+ * API No. 
+ * API Name : 신규 입점 브랜드 조회 API
+ * [GET] /brands/new
+ */
+
+exports.getBrandNew = async function(req, res) {
+
+    // Request Token
+    const userIdx = req.verifiedToken.userIdx;
+
+
+    // Request Body
+    const bodyIdx = req.body;
+
+    // Validation Check (Request Error)
+    if (!userIdx | !bodyIdx) 
+        return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
+
+    if (userIdx !== parseInt(bodyIdx.bodyIdx))
+        return res.send(errResponse(baseResponse.ID_NOT_MATCHING)); // 2020 : userId가 다릅니다.
+
+    const checkUserIdx = await productProvider.userCheck(userIdx);
+
+    if (checkUserIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
+
+    // rank Result
+    let newBrand = await brandProvider.getNewBrand(userIdx);
+
+    return res.send(response(baseResponse.SUCCESS, newBrand));
+
+ }

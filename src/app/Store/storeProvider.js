@@ -152,3 +152,13 @@ exports.getStoreStory = async function (storeIdx, userIdx) {
   
     return res;
 }
+
+// Get Rank Store
+exports.getRankStore = async function (userIdx, condition, page, size) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const rankStoreResult = await storeDao.selectRankStore(connection, [userIdx, condition, page, size]);
+  
+    connection.release();
+  
+    return rankStoreResult;
+};

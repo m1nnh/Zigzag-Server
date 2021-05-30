@@ -58,6 +58,16 @@ async function selectLogin(connection, [email, hashedPassword]) {
   return loginCheckRow;
 }
 
+// logout
+async function userLogout(connection, userIdx) {
+  const logoutQuery = `
+  update User
+  set isLogin = 'N'
+  where userIdx = ?`;
+  const logoutRow = await connection.query(logoutQuery, userIdx);
+  return logoutRow[0];
+}
+
 // Patch All
 async function updateAll(connection, [userPhoneNum, userName, userIdx]) {
   const updateAllQuery = `
@@ -95,6 +105,7 @@ module.exports = {
   selectLogin,
   insertUser,
   selectSignUpProfile,
+  userLogout,
   updateAll,
   updateName,
   updatePhoneNum

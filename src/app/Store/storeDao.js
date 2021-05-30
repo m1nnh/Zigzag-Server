@@ -136,6 +136,77 @@ async function selectBookMarkStoreStory(connection, userIdx) {
     return storyListRow;
 }
 
+// Get Rank Store
+async function selectRankStore(connection, [userIdx, condition, page, size]) {
+
+    const rankStoreQuery = `
+    select s.storeIdx,
+       s.storeUrl,
+       s.storeName,
+       s.mainCategory,
+       case
+           when maxCouponPrice is null
+               then ''
+
+           else
+               concat('최대 ', format(maxCouponPrice, 0), '원 할인 쿠폰') end as maxCouponPrice,
+       case
+           when s.deliveryPrice = 0
+               then '무료배송'
+           else
+               '' end                                                  as deliveryPrice,
+       ifnull(z.status, 'N')                                           as bookmarkStatus,
+       ifnull(bookmarkCount, 0) as bookmarkCount
+    from Store s
+         left join Product p on p.storeIdx = s.storeIdx
+         left join Category c on p.categoryIdx = c.categoryIdx
+         left join ProductDetail pd on p.productIdx = pd.productIdx
+         left join (select ifnull(count(s.storeIdx), 0) as bookmarkCount, s.storeIdx from Store s left join Bookmark bm on bm.storeIdx = s.storeIdx
+             where bm.status = 'N' group by s.storeIdx) as a on s.storeIdx = a.storeIdx
+         left join (select ifnull(bm.status, 'N') as status, s.storeIdx
+                    from Store s
+                             left join Bookmark bm on bm.storeIdx = s.storeIdx
+                             left join User u on u.userIdx = bm.userIdx
+                    where bm.userIdx = ?) as z on z.storeIdx = s.storeIdx
+         left join (select ifnull(count(rc.productIdx), 0) as readCount, s.storeIdx
+                    from Store s
+                             left join Product p
+                                       on s.storeIdx = p.storeIdx
+                             left join Category c on c.categoryIdx = p.categoryIdx
+                             left join ReadCount rc on rc.productIdx = p.productIdx
+                    where p.status = 'N' ` + condition + `
+                      
+                    group by s.storeIdx) as v on v.storeIdx = s.storeIdx
+         left join (select ifnull(sum(pb.productNum), 0) as orderCount, p.storeIdx
+                    from Product p
+                             left join Category c on c.categoryIdx = p.categoryIdx
+                             left join ProductDetail pd on p.productIdx = pd.productIdx
+                             left join ProductBasket pb on pb.productDetailIdx = pd.productDetailIdx
+                             left join Basket b on b.basketIdx = pb.basketIdx
+                             left join OrderProduct op on op.basketIdx = b.basketIdx
+                    where op.confirm = 'Y'
+                      and p.status = 'N' ` + condition + `
+                      
+                    group by p.productIdx) as w on w.storeIdx = s.storeIdx
+         left join (select sum(r.score) as score, storeIdx
+                    from Product p
+                             left join Category c on c.categoryIdx = p.categoryIdx
+                             left join Review r on p.productIdx = r.productIdx
+                    where r.status = 'N'
+                      and p.status = 'N' ` + condition + `
+                    group by p.storeIdx) as y on y.storeIdx = s.storeIdx
+         left join (select max(c.couponPrice) as maxCouponPrice, s.storeIdx from Store s left join Coupon c on s.storeIdx = c.storeIdx where c.status = 'N') as x
+                   on x.storeIdx = s.storeIdx
+    where s.status = 'N' ` + condition + `
+    group by s.storeIdx
+    order by (readCount + orderCount + score) DESC
+    limit ` + page + `, ` + size + `;
+
+      `;
+    const [rankStoreRow] = await connection.query(rankStoreQuery, [userIdx, condition, page, size]);
+  
+    return rankStoreRow;
+}
   
 
 
@@ -150,5 +221,6 @@ module.exports = {
     selectStoryReadCheck,
     insertReadCount,
     selectStoreStoryIdxList,
-    selectBookMarkStoreStory
+    selectBookMarkStoreStory,
+    selectRankStore
   };
