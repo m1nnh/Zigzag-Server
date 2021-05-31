@@ -105,7 +105,7 @@ async function selectHomeProduct(connection, [page, size]) {
           when productSale > 0 and zSaleFlag = 'N'
               then concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
           when productSale > 0 and zSaleFlag = 'Y'
-              then concat('제트할인가 ', productPrice, '\n',productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
+              then concat('제트할인가 ', format(productPrice, 0), '\n',productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
           else
               format(productPrice, 0) end as resultPrice,
       case
@@ -143,7 +143,7 @@ async function selectHomeSlideProduct(connection) {
            when productSale > 0 and zSaleFlag = 'N'
                then concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
            when productSale > 0 and zSaleFlag = 'Y'
-               then concat('제트할인가 ', productPrice, '\n', productSale, '% ',
+               then concat('제트할인가 ', format(productPrice, 0), '\n', productSale, '% ',
                            format(productPrice * ((100 - productSale) / 100), 0))
            else
                format(productPrice, 0) end as resultPrice,
@@ -198,7 +198,7 @@ async function selectBrandProduct(connection, [page, size, brandIdx]) {
            when productSale > 0 and zSaleFlag = 'N'
                then concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
            when productSale > 0 and zSaleFlag = 'Y'
-               then concat('제트할인가 ', productPrice, '\n', productSale, '% ',
+               then concat('제트할인가 ', format(productPrice, 0), '\n', productSale, '% ',
                            format(productPrice * ((100 - productSale) / 100), 0))
            else
                format(productPrice, 0) end as resultPrice,
@@ -374,7 +374,7 @@ async function selectWeekBestProduct(connection, brandIdx) {
         when productSale > 0 and zSaleFlag = 'N'
             then concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
         when productSale > 0 and zSaleFlag = 'Y'
-            then concat('제트할인가 ', productPrice, '\n', productSale, '% ',
+            then concat('제트할인가 ', format(productPrice, 0), '\n', productSale, '% ',
                         format(productPrice * ((100 - productSale) / 100), 0))
         else
             format(productPrice, 0) end as resultPrice,
@@ -435,7 +435,7 @@ async function selectBrandCategoryProduct(connection, [page, size, category, con
         when productSale > 0 and zSaleFlag = 'N'
             then concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
         when productSale > 0 and zSaleFlag = 'Y'
-            then concat('제트할인가 ', productPrice, '\n', productSale, '% ',
+            then concat('제트할인가 ', format(productPrice, 0), '\n', productSale, '% ',
                         format(productPrice * ((100 - productSale) / 100), 0))
         else
             format(productPrice, 0) end as resultPrice,
@@ -451,7 +451,7 @@ async function selectBrandCategoryProduct(connection, [page, size, category, con
     left join ProductBasket pb on pb.productDetailIdx = pd.productDetailIdx
     left join Basket bs on bs.basketIdx = pb.basketIdx
     left join OrderProduct op on op.basketIdx = bs.basketIdx
-    left join (select count(rc.productIdx) as readCount, productIdx from ReadCount rc) as v on v.productIdx=p.productIdx
+    left join (select count(rc.productIdx) as readCount, productIdx from ReadCount rc group by productIdx) as v on v.productIdx=p.productIdx
     left join (select ifnull(count(r.reviewIdx), 0)               as reviewCount,
                           productIdx
                   from Review r
@@ -537,7 +537,7 @@ async function selectBestProduct(connection, [page, size, condition, ageconditio
         when productSale > 0 and zSaleFlag = 'N'
             then concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
         when productSale > 0 and zSaleFlag = 'Y'
-            then concat('제트할인가 ', productPrice, '\n', productSale, '% ',
+            then concat('제트할인가 ', format(productPrice, 0), '\n', productSale, '% ',
                         format(productPrice * ((100 - productSale) / 100), 0))
         else
             format(productPrice, 0) end as resultPrice,
@@ -581,7 +581,7 @@ async function selectTimeSaleProduct(connection, [page, size]) {
            when productSale > 0 and zSaleFlag = 'N'
                then concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
            when productSale > 0 and zSaleFlag = 'Y'
-               then concat('제트할인가 ', productPrice, '\n', productSale, '% ',
+               then concat('제트할인가 ', format(productPrice, 0), '\n', productSale, '% ',
                            format(productPrice * ((100 - productSale) / 100), 0))
            else
                format(productPrice, 0) end as resultPrice,
@@ -606,8 +606,8 @@ async function selectTimeSaleProduct(connection, [page, size]) {
 }
 
 
-// Get Sale Product
-async function selectSaleProduct(connection, condition) {
+// Get Benefit Product
+async function selectBenefitProduct(connection, categoryRef) {
 
   const saleProductQuery = `
     select p.storeIdx,
@@ -621,7 +621,46 @@ async function selectSaleProduct(connection, condition) {
             when productSale > 0 and zSaleFlag = 'N'
                 then concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
             when productSale > 0 and zSaleFlag = 'Y'
-                then concat('제트할인가 ', productPrice, '\n', productSale, '% ',
+                then concat('제트할인가 ', format(productPrice, 0), '\n', productSale, '% ',
+                            format(productPrice * ((100 - productSale) / 100), 0))
+            else
+                format(productPrice, 0) end as resultPrice,
+        case
+            when s.deliveryPrice = 0
+                then '무료배송'
+            else
+                '' end                      as deliveryPrice,
+        case
+            when p.brandIdx is null
+                then ''
+            else
+                '브랜드' end                   as brandStatus
+    from Product p
+          left join Store s on s.storeIdx = p.storeIdx
+          left join Category c on c.categoryIdx = p.categoryIdx
+    where p.productSale != 0 and p.status = 'N' and c.categoryRef = ?
+    order by p.productSale DESC
+    limit 10;`;
+  const [saleProductRow] = await connection.query(saleProductQuery, categoryRef);
+  
+  return saleProductRow;
+}
+
+
+// Get Sale Product
+async function selectSaleProduct(connection, [condition, page, size, categoryRef]) {
+  const saleProductQuery = `
+    select (select categoryName from Category where categoryIdx = ?) as categoryName, p.storeIdx,
+        p.productIdx,
+        thumbnailUrl,
+        zFlag,
+        s.storeName,
+        p.productContents,
+        case
+            when productSale > 0 and zSaleFlag = 'N'
+                then concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
+            when productSale > 0 and zSaleFlag = 'Y'
+                then concat('제트할인가 ', format(productPrice, 0), '\n', productSale, '% ',
                             format(productPrice * ((100 - productSale) / 100), 0))
             else
                 format(productPrice, 0) end as resultPrice,
@@ -640,8 +679,8 @@ async function selectSaleProduct(connection, condition) {
           left join Category c on c.categoryIdx = p.categoryIdx
     where p.productSale != 0 and p.status = 'N' ` + condition + `
     order by p.productSale DESC
-    limit 10;`;
-  const [saleProductRow] = await connection.query(saleProductQuery, condition);
+    limit ` + page + `, ` + size + `;`;
+  const [saleProductRow] = await connection.query(saleProductQuery, [categoryRef, condition, page, size]);
   
   return saleProductRow;
 }
@@ -660,7 +699,7 @@ async function selectSaleNewProduct(connection, [page, size, condition]) {
             when productSale > 0 and zSaleFlag = 'N'
                 then concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
             when productSale > 0 and zSaleFlag = 'Y'
-                then concat('제트할인가 ', productPrice, '\n', productSale, '% ',
+                then concat('제트할인가 ', format(productPrice, 0), '\n', productSale, '% ',
                             format(productPrice * ((100 - productSale) / 100), 0))
             else
                 format(productPrice, 0) end as resultPrice,
@@ -700,7 +739,7 @@ async function selectNewProduct(connection, [page, size]) {
         when productSale > 0 and zSaleFlag = 'N'
             then concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
         when productSale > 0 and zSaleFlag = 'Y'
-            then concat('제트할인가 ', productPrice, '\n', productSale, '% ',
+            then concat('제트할인가 ', format(productPrice, 0), '\n', productSale, '% ',
                         format(productPrice * ((100 - productSale) / 100), 0))
         else
             format(productPrice, 0) end as resultPrice,
@@ -724,47 +763,6 @@ async function selectNewProduct(connection, [page, size]) {
   
   return newProductRow;
 };
-
-
-// Get Category Sale Product
-async function selectCateProduct(connection, [page, size, cond]) {
-
-  const cateProductQuery = `
-    select p.storeIdx,
-        p.productIdx,
-        thumbnailUrl,
-        zFlag,
-        s.storeName,
-        p.productContents,
-        case
-            when productSale > 0 and zSaleFlag = 'N'
-                then concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
-            when productSale > 0 and zSaleFlag = 'Y'
-                then concat('제트할인가 ', productPrice, '\n', productSale, '% ',
-                            format(productPrice * ((100 - productSale) / 100), 0))
-            else
-                format(productPrice, 0) end as resultPrice,
-        case
-            when s.deliveryPrice = 0
-                then '무료배송'
-            else
-                '' end                      as deliveryPrice,
-        case
-            when p.brandIdx is null
-                then ''
-            else
-                '브랜드' end                   as brandStatus
-    from Product p
-          left join Store s on s.storeIdx = p.storeIdx
-          left join Category c on c.categoryIdx = p.categoryIdx
-    where p.status = 'N' ` + cond + `
-    limit ` + page + `, ` + size + `
-    `;
-  const [cateProductRow] = await connection.query(cateProductQuery, [page, size, cond]);
-
-  return cateProductRow;
-}
-
 
 // Get Product Image
 async function selectProductImage(connection, productIdx) {
@@ -790,8 +788,8 @@ async function selectProductIntro(connection, productIdx) {
         when productSale > 0 and zSaleFlag = 'N'
             then concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
         when productSale > 0 and zSaleFlag = 'Y'
-            then concat('제트할인가\n', productSale, '% ',
-                        format(productPrice * ((100 - productSale) / 100), 0), '  ',  p.productPrice)
+            then concat('제트할인가\n', format(productSale, 0), '% ',
+                        format(productPrice * ((100 - productSale) / 100), 0), '  ', format(p.productPrice, 0))
         else
             format(productPrice, 0) end as resultPrice,
     s.productPayInfo,
@@ -958,7 +956,7 @@ async function selectCategoryProduct(connection, [condition, storeIdx, page, siz
            when productSale > 0 and zSaleFlag = 'N'
                then concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
            when productSale > 0 and zSaleFlag = 'Y'
-               then concat('제트할인가 ', productPrice, '\n', productSale, '% ',
+               then concat('제트할인가 ', format(productPrice, 0), '\n', productSale, '% ',
                            format(productPrice * ((100 - productSale) / 100), 0))
            else
                format(productPrice, 0) end as resultPrice,
@@ -1015,7 +1013,7 @@ async function selectRecommendationProduct(connection, storeIdx) {
            when productSale > 0 and zSaleFlag = 'N'
                then concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
            when productSale > 0 and zSaleFlag = 'Y'
-               then concat('제트할인가 ', productPrice, '\n', productSale, '% ',
+               then concat('제트할인가 ', format(productPrice, 0), '\n', productSale, '% ',
                            format(productPrice * ((100 - productSale) / 100), 0))
            else
                format(productPrice, 0) end as resultPrice,
@@ -1127,7 +1125,7 @@ async function selectReviewContents(connection, productIdx) {
           left join ReviewColor rc on rc.colorIdx = r.colorIdx
           left join OrderProduct op on op.orderIdx = r.orderIdx
           left join Basket b on op.basketIdx = b.basketIdx
-          left join ProductBasket pb on b.productDetailIdx = pb.productDetailIdx
+          left join ProductBasket pb on b.basketIdx = pb.basketIdx
           left join ProductDetail pd on pd.productDetailIdx = pb.productDetailIdx
           left join Size s on s.sizeIdx = pd.sizeIdx
           left join Color c on pd.colorIdx = c.colorIdx
@@ -1254,7 +1252,7 @@ async function selectReviewTotalContents(connection, [productIdx, page, size, co
       left join ReviewColor rc on rc.colorIdx = r.colorIdx
       left join OrderProduct op on op.orderIdx = r.orderIdx
       left join Basket b on op.basketIdx = b.basketIdx
-      left join ProductBasket pb on b.productDetailIdx = pb.productDetailIdx
+      left join ProductBasket pb on b.basketIdx = pb.basketIdx
       left join ProductDetail pd on pd.productDetailIdx = pb.productDetailIdx
       left join Size s on s.sizeIdx = pd.sizeIdx
       left join Color c on pd.colorIdx = c.colorIdx
@@ -1402,6 +1400,114 @@ async function updateLikeFlagStatus(connection, [reviewIdx, userIdx]) {
   return updateLikeFlagRow;
 }
 
+// Select Bookmark Store Product
+async function selectProductList(connection, [userIdx, page, size]) {
+
+  const productListQuery = `
+    select p.storeIdx, s.storeUrl,
+    s.storeName,
+    p.productIdx,
+    thumbnailUrl,
+    zFlag,
+    productContents,
+    case
+        when productSale > 0 and zSaleFlag = 'N'
+            then concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
+        when productSale > 0 and zSaleFlag = 'Y'
+            then concat('제트할인가 ', format(productPrice, 0), '\n',productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
+        else
+            format(productPrice, 0) end as resultPrice,
+    case
+      when s.deliveryPrice = 0
+            then '무료배송'
+        else
+                '' end as deliveryPrice,
+                case
+          when p.brandIdx is null
+              then ''
+          else
+              '브랜드' end                   as brandStatus,
+      ifnull(likeStatus, 'N') as likeStatus
+    from Store s
+    left join Product p on p.storeIdx = s.storeIdx
+    left join (select ifnull(lp.status, 'N') as likeStatus, p.productIdx from Store s left join Product p on p.storeIdx = s.storeIdx
+      left join LikeProduct lp on lp.productIdx = p.productIdx where s.status = 'N' and p.status = 'n' and lp.userIdx = ?) as v on v.productIdx = p.productIdx
+    left join Bookmark b on b.storeIdx = s.storeIdx
+    left join User u on u.userIdx = b.userIdx
+    where p.status= 'N' and s.status = 'N' and b.userIdx = ? and b.status = 'Y' and timestampdiff(day, p.createdAt, current_timestamp()) < 7
+    group by p.productIdx
+    limit ` + page + `, ` + size + `;
+    `;
+  const [productListRow] = await connection.query(productListQuery, [userIdx, userIdx, page, size]);
+
+  return productListRow;
+}
+
+// Select Bookmark Store Product
+async function selectSearchProductList(connection, [userIdx, contents, categoryCondition, deliveryCondition, originalCondition, page, size]) {
+
+  const productListQuery = `
+  select p.productIdx,
+  thumbnailUrl,
+  p.storeIdx,
+  s.storeName,
+  zFlag,
+  productContents,
+  case
+      when productSale > 0 and zSaleFlag = 'N'
+          then concat(productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
+      when productSale > 0 and zSaleFlag = 'Y'
+          then concat('제트할인가 ', format(productPrice, 0), '\n',productSale, '% ', format(productPrice * ((100 - productSale) / 100), 0))
+      else
+          format(productPrice, 0) end as resultPrice,
+  case
+    when s.deliveryPrice = 0
+          then '무료배송'
+      else
+              '' end as deliveryPrice,
+              case
+       when p.brandIdx is null
+           then ''
+       else
+           '브랜드' end                   as brandStatus,
+   ifnull(likeStatus, 'N') as likeStatus
+from Product p
+left join Store s on p.storeIdx = s.storeIdx
+left join ProductDetail pd on pd.productIdx = p.productIdx
+left join ProductBasket pb on pb.productDetailIdx = pd.productDetailIdx
+left join Basket bs on bs.basketIdx = pb.basketIdx
+left join OrderProduct op on op.basketIdx = bs.basketIdx
+left join (select ifnull(lp.status, 'N') as likeStatus, p.productIdx from Product p
+    left join LikeProduct lp on lp.productIdx = p.productIdx where p.status = 'n' and lp.userIdx = ?) as v on v.productIdx = p.productIdx
+    left join (select count(rc.productIdx) as readCount, productIdx from ReadCount rc group by productIdx) as x on x.productIdx=p.productIdx
+    left join (select ifnull(count(r.reviewIdx), 0)               as reviewCount,
+                          productIdx
+                  from Review r
+                  group by r.productIdx) as w on w.productIdx = p.productIdx
+    left join Category c on c.categoryIdx = p.categoryIdx
+where p.status= 'N' and s.status = 'N' and p.productContents like '%` + contents + `%' `+ categoryCondition +` ` + deliveryCondition +`
+group by p.productIdx
+` + originalCondition + `
+limit ` + page + `, ` + size +`;
+    `;
+  const [productListRow] = await connection.query(productListQuery, [userIdx, contents, categoryCondition, deliveryCondition, originalCondition, page, size]);
+
+  return productListRow;
+}
+
+// Check CategoryIdx
+async function selectCheckCategoryIdx(connection, [brandIdx, categoryIdx]) {
+
+  const checkQuery = `
+    select exists (select categoryIdx from Brand b left join Product p on p.brandIdx = b.brandIdx where p.brandIdx = ? and categoryIdx = ?) as exist
+    `;
+  const [checkRow] = await connection.query(checkQuery, [brandIdx, categoryIdx]);
+
+  return checkRow;
+}
+
+
+
 
 module.exports = {
     selectHomeProduct,
@@ -1428,7 +1534,6 @@ module.exports = {
     insertBrandCoupon,
     selectBestProduct,
     selectTimeSaleProduct,
-    selectCateProduct,
     selectSaleProduct,
     selectSaleNewProduct,
     selectNewProduct,
@@ -1465,6 +1570,10 @@ module.exports = {
     updateLikeFlag,
     insertLikeFlag,
     selectLikeFlagStatus,
-    updateLikeFlagStatus
+    updateLikeFlagStatus,
+    selectProductList,
+    selectSearchProductList,
+    selectCheckCategoryIdx,
+    selectBenefitProduct
   };
   

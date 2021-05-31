@@ -96,6 +96,7 @@ exports.getStoreStory = async function (storeIdx, userIdx) {
         notReadCheck = await storeDao.selectNotReadStory(connection, [storeIdx, userIdx]);
         getStoreStoryIdx = await storeDao.selectStoreStoryIdxList(connection, storeIdx);
 
+        
         if (getStoreStoryIdx.length === 0)
             return res.send(errResponse(baseResponse.STORYIDX_NOT_EXIST)) // 2042 : 존재하지 않는 스토리입니다.
         
@@ -118,17 +119,17 @@ exports.getStoreStory = async function (storeIdx, userIdx) {
 
             for (var i = 0; i < readIdx.length; i++)
                 result.push(readIdx[i]);
-        
-            getStoreStory = await storeDao.selectStory(connection, [result[0], userIdx]);
+
+            getStoreStory = await storeDao.selectStory(connection, [result[0].storyIdx, userIdx]);
             checkUserRead = await storeDao.selectStoryReadCheck(connection, [result[0], userIdx]);
             
             if (checkUserRead[0].exist === 0)
-                insertReadCount = await storeDao.insertReadCount(connection, [result[0], userIdx]);
+                insertReadCount = await storeDao.insertReadCount(connection, [result[0].storyIdx, userIdx]);
         }
         else {
             result = getStoreStoryIdx
-            getStoreStory = await storeDao.selectStory(connection, [result[0], userIdx]);
-            insertReadCount = await storeDao.insertReadCount(connection, [result[0], userIdx]);
+            getStoreStory = await storeDao.selectStory(connection, [result[0].storyIdx, userIdx]);
+            insertReadCount = await storeDao.insertReadCount(connection, [result[0].storyIdx, userIdx]);
         }
         storyIdxList = result;
         let storyInfo = getStoreStory;
@@ -161,4 +162,14 @@ exports.getRankStore = async function (userIdx, condition, page, size) {
     connection.release();
   
     return rankStoreResult;
+};
+
+// Get Bookmark Store
+exports.getBookmarkStore = async function (userIdx, condition, page, size) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const bookmarkStoreResult = await storeDao.selectBookMarkStore(connection, [userIdx, condition, page, size]);
+  
+    connection.release();
+  
+    return bookmarkStoreResult;
 };

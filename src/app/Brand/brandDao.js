@@ -52,7 +52,8 @@ async function selectRankBrand(connection, [userIdx, page, size]) {
                     where r.status = 'N'
                       and p.status = 'N'
                     group by p.brandIdx) as y on y.brandIdx = b.brandIdx
-         left join (select max(c.couponPrice) as maxCouponPrice, b.brandIdx from Brand b left join Coupon c on c.brandIdx= b.brandIdx where c.status = 'N') as x
+         left join (select max(c.couponPrice) as maxCouponPrice, b.brandIdx from Brand b left join Coupon c on c.brandIdx= b.brandIdx where c.status = 'N'
+         group by b.brandIdx) as x
                    on x.brandIdx = b.brandIdx
     where b.status = 'N'
     group by b.brandIdx
@@ -127,7 +128,8 @@ async function selectNewBrand(connection, userIdx) {
                  where r.status = 'N'
                    and p.status = 'N'
                  group by p.brandIdx) as y on y.brandIdx = b.brandIdx
-      left join (select max(c.couponPrice) as maxCouponPrice, b.brandIdx from Brand b left join Coupon c on c.brandIdx= b.brandIdx where c.status = 'N') as x
+      left join (select max(c.couponPrice) as maxCouponPrice, b.brandIdx from Brand b left join Coupon c on c.brandIdx= b.brandIdx where c.status = 'N'
+      group by b.brandIdx) as x
                 on x.brandIdx = b.brandIdx
     where b.status = 'N' and timestampdiff(day, b.createdAt, current_timestamp()) < 30
     group by b.brandIdx
