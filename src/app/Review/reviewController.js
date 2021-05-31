@@ -31,7 +31,7 @@ exports.getMainReview = async function (req, res) {
     const bodyIdx = req.body;
     
     // Validation Check (Request Error)
-    if (!userIdx | !bodyIdx) 
+    if (!userIdx || !bodyIdx) 
         return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
 
     if (userIdx !== parseInt(bodyIdx.bodyIdx))
@@ -42,7 +42,7 @@ exports.getMainReview = async function (req, res) {
     if (checkUserIdx[0].exist === 0)
         return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
 
-    if (!regNum.test(productIdx) & productIdx < 1)
+    if (!regNum.test(productIdx) && productIdx < 1)
         return res.send(response(baseResponse.PRODUCTIDX_ONLY_NUMBER)); // 2031 : productIdx는 숫자만 입력이 가능합니다.
 
     const checkProductIdx = await productProvider.productIdxCheck(productIdx);
@@ -82,7 +82,7 @@ exports.getTotalReviewTitle = async function (req, res) {
     const bodyIdx = req.body;
   
     // Validation Check (Request Error)
-    if (!userIdx | !bodyIdx) 
+    if (!userIdx || !bodyIdx) 
         return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
 
     if (userIdx !== parseInt(bodyIdx.bodyIdx))
@@ -93,7 +93,7 @@ exports.getTotalReviewTitle = async function (req, res) {
     if (checkUserIdx[0].exist === 0)
         return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
 
-    if (!regNum.test(productIdx) & productIdx < 1)
+    if (!regNum.test(productIdx) && productIdx < 1)
         return res.send(response(baseResponse.PRODUCTIDX_ONLY_NUMBER)); // 2031 : productIdx는 숫자만 입력이 가능합니다.
 
     const checkProductIdx = await productProvider.productIdxCheck(productIdx);
@@ -129,7 +129,7 @@ exports.getTotalReview = async function (req, res) {
     var pcondition = 'and r.imageFlag = "Y"'
     
     // Validation Check (Request Error)
-    if (!userIdx | !bodyIdx) 
+    if (!userIdx || !bodyIdx) 
         return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
 
     if (userIdx !== parseInt(bodyIdx.bodyIdx))
@@ -140,7 +140,7 @@ exports.getTotalReview = async function (req, res) {
     if (checkUserIdx[0].exist === 0)
         return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
 
-    if (!regNum.test(productIdx) & productIdx < 1)
+    if (!regNum.test(productIdx) && productIdx < 1)
         return res.send(response(baseResponse.PRODUCTIDX_ONLY_NUMBER)); // 2031 : productIdx는 숫자만 입력이 가능합니다.
 
     const checkProductIdx = await productProvider.productIdxCheck(productIdx);
@@ -151,13 +151,13 @@ exports.getTotalReview = async function (req, res) {
     if (!page)
         return res.send(response(baseResponse.PAGE_EMPTY)); // 2012 : page를 입력해주세요.
     
-    if (!regPage.test(page) & page < 1) 
+    if (!regPage.test(page) && page < 1) 
         return res.send(response(baseResponse.PAGE_ERROR_TYPE)); // 2013 : page 번호를 확인해주세요.
 
     if (!size) 
         return res.send(response(baseResponse.SIZE_EMPTY)); // 2014 : size를 입력해주세요.
 
-    if (!regSize.test(size) & size < 1) 
+    if (!regSize.test(size) && size < 1) 
         return res.send(response(baseResponse.SIZE_ERROR_TYPE)); // 2015 : size 번호를 확인해주세요.
 
     page = size * (page-1);
@@ -212,7 +212,7 @@ exports.patchLikeFlag = async function (req, res) {
     const {status} = req.query;
     
     // Validation Check (Request Error)
-    if (!userIdx | !bodyIdx) 
+    if (!userIdx || !bodyIdx) 
         return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
 
     if (userIdx !== parseInt(bodyIdx.bodyIdx))
@@ -223,7 +223,7 @@ exports.patchLikeFlag = async function (req, res) {
     if (checkUserIdx[0].exist === 0)
         return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
 
-    if (!regNum.test(reviewIdx) & reviewIdx < 1)
+    if (!regNum.test(reviewIdx) && reviewIdx < 1)
         return res.send(response(baseResponse.REVIEWIDX_ERROR_TYPE)); // 2039 : reviewIdx는 숫자만 입력이 가능합니다.
 
     const checkReviewIdx = await productProvider.reviewIdxCheck(reviewIdx);
@@ -234,7 +234,7 @@ exports.patchLikeFlag = async function (req, res) {
     if (!status)
         return res.send(errResponse(baseResponse.STATUS_EMPTY)); // 2032 : status 값을 입력해주세요.
     
-    if (status !== 'N' & status != 'Y')
+    if (status !== 'N' && status != 'Y')
         return res.send(errResponse(baseResponse.STATUS_ERROR_TYPE)); // 2033 : status Y또는 N을 입력해주세요.
     
     const checkLikeStatus = await productProvider.likeReviewCheck(reviewIdx, userIdx);

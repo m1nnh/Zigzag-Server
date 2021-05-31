@@ -33,7 +33,7 @@ exports.getBrandIntro = async function(req, res) {
     const bodyIdx = req.body;
 
     // Validation Check (Request Error)
-    if (!userIdx | !bodyIdx) 
+    if (!userIdx || !bodyIdx) 
         return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
 
     if (userIdx !== parseInt(bodyIdx.bodyIdx))
@@ -44,7 +44,7 @@ exports.getBrandIntro = async function(req, res) {
     if (checkUserIdx[0].exist === 0)
         return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
 
-    if (!regNum.test(brandIdx) & brandIdx < 1)
+    if (!regNum.test(brandIdx) && brandIdx < 1)
         return res.send(response(baseResponse.BRANDIDX_ERROR_TYPE)); // 2034 : brandIdx는 숫자만 입력이 가능합니다.
     
     const checkBrandIdx = await productProvider.brandIdxCheck(brandIdx);
@@ -76,7 +76,7 @@ exports.getBrandCoupon = async function(req, res) {
     const bodyIdx = req.body;
 
     // Validation Check (Request Error)
-    if (!userIdx | !bodyIdx) 
+    if (!userIdx || !bodyIdx) 
         return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
 
     if (userIdx !== parseInt(bodyIdx.bodyIdx))
@@ -87,7 +87,7 @@ exports.getBrandCoupon = async function(req, res) {
     if (checkUserIdx[0].exist === 0)
         return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
 
-    if (!regNum.test(brandIdx) & brandIdx < 1)
+    if (!regNum.test(brandIdx) && brandIdx < 1)
         return res.send(response(baseResponse.BRANDIDX_ERROR_TYPE)); // 2034 : brandIdx는 숫자만 입력이 가능합니다.
     
     const checkBrandIdx = await productProvider.brandIdxCheck(brandIdx);
@@ -102,6 +102,8 @@ exports.getBrandCoupon = async function(req, res) {
     const brandCouponResult = await productProvider.brandCoupon(brandIdx, userIdx);
     
     // 
+    if (brandCouponResult.length === 0)
+        return res.send(response(baseResponse.COUPON_NOT_EXIST)) // 2047 : 존재하는 쿠폰이 없습니다.
     var result = []
     result[0] = brandName[0];
     result[1] = brandCouponResult;
@@ -141,7 +143,7 @@ exports.postBrandCoupon = async function(req, res) {
     const bodyIdx = req.body;
 
     // Validation Check (Request Error)
-    if (!userIdx | !bodyIdx) 
+    if (!userIdx || !bodyIdx) 
         return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
 
     if (userIdx !== parseInt(bodyIdx.bodyIdx))
@@ -152,7 +154,7 @@ exports.postBrandCoupon = async function(req, res) {
     if (checkUserIdx[0].exist === 0)
         return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
 
-    if (!regNum.test(brandIdx) & brandIdx < 1)
+    if (!regNum.test(brandIdx) && brandIdx < 1)
         return res.send(response(baseResponse.BRANDIDX_ERROR_TYPE)); // 2034 : brandIdx는 숫자만 입력이 가능합니다.
     
     const checkBrandIdx = await productProvider.brandIdxCheck(brandIdx);
@@ -162,7 +164,6 @@ exports.postBrandCoupon = async function(req, res) {
 
     // Coupon Result
     const brandCouponResult = await productProvider.brandCoupon(brandIdx, userIdx);
-    console.log(brandCouponResult[0].couponIdx);
 
     if (number == 0) {
         for (var i = 0; i < brandCouponResult.length; i++) {
@@ -210,7 +211,7 @@ exports.patchBrandBookmark = async function (req, res) {
     const {status} = req.query;
     
     // Validation Check (Request Error)
-    if (!userIdx | !bodyIdx) 
+    if (!userIdx || !bodyIdx) 
         return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
 
     if (userIdx !== parseInt(bodyIdx.bodyIdx))
@@ -221,7 +222,7 @@ exports.patchBrandBookmark = async function (req, res) {
     if (checkUserIdx[0].exist === 0)
         return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
 
-    if (!regNum.test(brandIdx) & brandIdx < 1)
+    if (!regNum.test(brandIdx) && brandIdx < 1)
         return res.send(response(baseResponse.BRANDIDX_ERROR_TYPE)); // 2034 : brandIdx는 숫자만 입력이 가능합니다.
   
     const checkBrandIdx = await productProvider.brandIdxCheck(brandIdx);
@@ -232,7 +233,7 @@ exports.patchBrandBookmark = async function (req, res) {
     if (!status)
         return res.send(errResponse(baseResponse.STATUS_EMPTY)); // 2032 : status 값을 입력해주세요.
     
-    if (status !== 'N' & status != 'Y')
+    if (status !== 'N' && status != 'Y')
         return res.send(errResponse(baseResponse.STATUS_ERROR_TYPE)); // 2033 : status Y또는 N을 입력해주세요.
     
     const checkBookmarkStatus = await productProvider.brandBookmarkCheck(brandIdx, userIdx);
@@ -267,7 +268,7 @@ exports.getTotalRank = async function(req, res) {
     const bodyIdx = req.body;
 
     // Validation Check (Request Error)
-    if (!userIdx | !bodyIdx) 
+    if (!userIdx || !bodyIdx) 
         return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
 
     if (userIdx !== parseInt(bodyIdx.bodyIdx))
@@ -281,13 +282,13 @@ exports.getTotalRank = async function(req, res) {
     if (!page)
         return res.send(response(baseResponse.PAGE_EMPTY)); // 2012 : page를 입력해주세요.
     
-    if (!regPage.test(page) & page < 1) 
+    if (!regPage.test(page) && page < 1) 
         return res.send(response(baseResponse.PAGE_ERROR_TYPE)); // 2013 : page 번호를 확인해주세요.
 
     if (!size) 
         return res.send(response(baseResponse.SIZE_EMPTY)); // 2014 : size를 입력해주세요.
 
-    if (!regSize.test(size) & size < 1) 
+    if (!regSize.test(size) && size < 1) 
         return res.send(response(baseResponse.SIZE_ERROR_TYPE)); // 2015 : size 번호를 확인해주세요.
     
     page = size * (page-1);
@@ -316,7 +317,7 @@ exports.getBrandNew = async function(req, res) {
     const bodyIdx = req.body;
 
     // Validation Check (Request Error)
-    if (!userIdx | !bodyIdx) 
+    if (!userIdx || !bodyIdx) 
         return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
 
     if (userIdx !== parseInt(bodyIdx.bodyIdx))

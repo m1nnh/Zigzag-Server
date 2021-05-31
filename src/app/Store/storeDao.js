@@ -195,7 +195,8 @@ async function selectRankStore(connection, [userIdx, condition, page, size]) {
                     where r.status = 'N'
                       and p.status = 'N' ` + condition + `
                     group by p.storeIdx) as y on y.storeIdx = s.storeIdx
-         left join (select max(c.couponPrice) as maxCouponPrice, s.storeIdx from Store s left join Coupon c on s.storeIdx = c.storeIdx where c.status = 'N') as x
+         left join (select max(c.couponPrice) as maxCouponPrice, s.storeIdx from Store s left join Coupon c on s.storeIdx = c.storeIdx where c.status = 'N'
+         group by s.storeIdx) as x
                    on x.storeIdx = s.storeIdx
     where s.status = 'N' ` + condition + `
     group by s.storeIdx
@@ -206,6 +207,41 @@ async function selectRankStore(connection, [userIdx, condition, page, size]) {
     const [rankStoreRow] = await connection.query(rankStoreQuery, [userIdx, condition, page, size]);
   
     return rankStoreRow;
+}
+
+// Get Bookmark Store
+async function selectBookMarkStore(connection, [userIdx, condition, page, size]) {
+
+    const storeListQuery = `
+        select s.storeIdx,
+        s.storeUrl,
+        s.storeName,
+        s.mainCategory,
+        case
+            when maxCouponPrice is null
+                then ''
+
+            else
+                concat('최대 ', format(maxCouponPrice, 0), '원 할인 쿠폰') end as maxCouponPrice,
+        case
+            when s.deliveryPrice = 0
+                then '무료배송'
+            else
+                '' end                                                  as deliveryPrice
+        from Store s
+        left join Product p on p.storeIdx = s.storeIdx
+        left join Bookmark bm on bm.storeIdx = s.storeIdx
+        left join User u on u.userIdx = bm.userIdx
+        left join (select max(c.couponPrice) as maxCouponPrice, s.storeIdx from Store s left join Coupon c on s.storeIdx = c.storeIdx where c.status = 'N' group by s.storeIdx) as x
+                    on x.storeIdx = s.storeIdx
+        where s.status = 'N' and bm.userIdx = ? and bm.status = 'Y' ` + condition + `
+        group by s.storeIdx
+        order by bm.createdAt DESC
+        limit ` + page + `, ` + size + `;
+      `;
+    const [storeListRow] = await connection.query(storeListQuery, [userIdx, condition, page, size]);
+  
+    return storeListRow;
 }
   
 
@@ -222,5 +258,6 @@ module.exports = {
     insertReadCount,
     selectStoreStoryIdxList,
     selectBookMarkStoreStory,
-    selectRankStore
+    selectRankStore,
+    selectBookMarkStore
   };

@@ -278,25 +278,27 @@ exports.timeSaleProduct = async function (page, size) {
   return timeSaleProductResult;
 };
 
-// Get Sale Product
-exports.saleProduct = async function (condition) {
+// Get Benefit Product
+exports.benefitProduct = async function (categoryRef) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const saleProductResult = await productDao.selectSaleProduct(connection, condition);
+  const saleProductResult = await productDao.selectBenefitProduct(connection, categoryRef);
 
   connection.release();
 
   return saleProductResult;
 };
 
-// Get CateProduct
-exports.cateProduct = async function (page, size, cond) {
+
+// Get Sale Product
+exports.saleProduct = async function (condition, page, size, categoryRef) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const cateResult = await productDao.selectCateProduct(connection, [page, size, cond]);
+  const saleProductResult = await productDao.selectSaleProduct(connection, [condition, page, size, categoryRef]);
 
   connection.release();
 
-  return cateResult;
-}
+  return saleProductResult;
+};
+
 
 // Get New Sale Product
 exports.newSaleProduct = async function (page, size, condition) {
@@ -527,3 +529,32 @@ exports.likeFlagReview= async function (userIdx, reviewIdx) {
 
   return likeFlagResult;
 };
+
+// Get Bookmark Store Product
+exports.bookmarkNewProduct= async function (userIdx, page, size) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const productListResult = await productDao.selectProductList(connection, [userIdx, page, size]);
+  connection.release();
+
+  return productListResult;
+};
+
+// Get Search Product
+exports.searchProduct= async function (userIdx, contents, categoryCondition, deliveryCondition, originalCondition, page, size) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const productListResult = await productDao.selectSearchProductList(connection, [userIdx, contents, categoryCondition, deliveryCondition, originalCondition, page, size]);
+  connection.release();
+
+  return productListResult;
+};
+
+
+// Check CategoryIdx
+exports.categoryCheck= async function (brandIdx, categoryIdx) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const checkResult = await productDao.selectCheckCategoryIdx(connection, [brandIdx, categoryIdx]);
+  connection.release();
+
+  return checkResult;
+};
+
