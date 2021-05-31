@@ -116,20 +116,20 @@ exports.getStoreStory = async function (storeIdx, userIdx) {
             else
                 readIdx.push(getStoreStoryIdx[i].storyIdx); 
         }
-
+        
             for (var i = 0; i < readIdx.length; i++)
                 result.push(readIdx[i]);
-
-            getStoreStory = await storeDao.selectStory(connection, [result[0].storyIdx, userIdx]);
+            console.log(result);
+            getStoreStory = await storeDao.selectStory(connection, [result[0], userIdx]);
             checkUserRead = await storeDao.selectStoryReadCheck(connection, [result[0], userIdx]);
             
             if (checkUserRead[0].exist === 0)
-                insertReadCount = await storeDao.insertReadCount(connection, [result[0].storyIdx, userIdx]);
+                insertReadCount = await storeDao.insertReadCount(connection, [result[0], userIdx]);
         }
         else {
             result = getStoreStoryIdx
-            getStoreStory = await storeDao.selectStory(connection, [result[0].storyIdx, userIdx]);
-            insertReadCount = await storeDao.insertReadCount(connection, [result[0].storyIdx, userIdx]);
+            getStoreStory = await storeDao.selectStory(connection, [result[0], userIdx]);
+            insertReadCount = await storeDao.insertReadCount(connection, [result[0], userIdx]);
         }
         storyIdxList = result;
         let storyInfo = getStoreStory;
