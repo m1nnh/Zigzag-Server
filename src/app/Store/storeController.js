@@ -16,7 +16,7 @@ const regNum = /^[0-9]/g;
 const regUrl = /(http(s)?:\/\/)([a-z0-9\w]+\.*)+[a-z0-9]{2,4}/gi;
 
 /**
- * API No. 
+ * API No. 43
  * API Name : 쇼핑몰 북마크 수정 API
  * [PATCH] /stores/:storeIdx/book-mark
  */
@@ -75,7 +75,7 @@ exports.patchStoreBookmark = async function (req, res) {
  }
 
  /**
- * API No. 
+ * API No. 44
  * API Name : 스토어 스토리 생성 API
  * [POST] /stores/:storeIdx/story
  */
@@ -126,7 +126,7 @@ exports.postStory = async function (req, res) {
  }
 
  /**
- * API No. 
+ * API No. 45
  * API Name : 스토어 스토리 생성 API
  * [GET] /stores/:storyIdx/first-story
  */
@@ -173,7 +173,7 @@ exports.getFirstStory = async function (req, res) {
  }
 
  /**
- * API No. 
+ * API No. 46
  * API Name : 특정 스토리 조회 API
  * [GET] /storys/:storyIdx
  */
@@ -214,7 +214,7 @@ exports.getStory = async function (req, res) {
 }
 
 /**
- * API No. 
+ * API No. 47
  * API Name : 북마크 스토어 스토리 목록 조회 API
  * [GET] /storys/book-mark-store
  */
@@ -245,7 +245,7 @@ exports.getStoryList = async function (req, res) {
 }
 
 /**
- * API No. 
+ * API No. 48
  * API Name : 스토어 전체 랭킹 조회 API
  * [GET] /stores/total-rank
  */
@@ -372,7 +372,7 @@ exports.getTotalRank = async function(req, res) {
 
 
 /**
- * API No. 
+ * API No. 49
  * API Name : 북마크 스토어 조회 API
  * [GET] /stores/book-mark
  */
@@ -483,5 +483,61 @@ exports.getSearchProduct = async function (req, res) {
 
     
     return res.send(response(baseResponse.SUCCESS, searchProductResult));
+
+}
+
+/**
+ * API No. 
+ * API Name : 검색 스토어 조회 API
+ * [GET] /stores/search
+ */
+exports.
+getSearchStore = async function (req, res) {
+
+    // Request Token
+    const userIdx = req.verifiedToken.userIdx;
+
+    // Request Query String
+    let {page, size} = req.query;
+    
+    // Request Body
+    const {bodyIdx, contents} = req.body;
+    
+    // Validation Check (Request Error)
+    if (!userIdx | !bodyIdx) 
+        return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
+
+    if (userIdx !== parseInt(bodyIdx))
+        return res.send(errResponse(baseResponse.ID_NOT_MATCHING)); // 2020 : userId가 다릅니다.
+
+    const checkUserIdx = await productProvider.userCheck(userIdx);
+
+    if (checkUserIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
+
+    if (!page)
+        return res.send(response(baseResponse.PAGE_EMPTY)); // 2012 : page를 입력해주세요.
+    
+    if (!regPage.test(page) && page < 1) 
+        return res.send(response(baseResponse.PAGE_ERROR_TYPE)); // 2013 : page 번호를 확인해주세요.
+
+    if (!size) 
+        return res.send(response(baseResponse.SIZE_EMPTY)); // 2014 : size를 입력해주세요.
+
+    if (!regSize.test(size) && size < 1) 
+        return res.send(response(baseResponse.SIZE_ERROR_TYPE)); // 2015 : size 번호를 확인해주세요.
+
+
+    if (!contents)
+        return res.send(response(baseResponse.CONTENTS_EMPTY)); // 2044 : 검색 내용을 입력해주세요.
+
+    page = size * (page-1);
+    
+    
+    // Search Product Result
+    const searchStoreResult = await storeProvider.searchStore(userIdx, contents, page, size);
+
+    
+    return res.send(response(baseResponse.SUCCESS, searchStoreResult));
 
 }

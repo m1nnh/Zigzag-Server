@@ -24,7 +24,7 @@ exports.findPassword = async function (req, res) {
     
     subject: "임시비밀번호 발급입니다.", text: "임시비밀번호 : wwqedfasvccvxz" }; 
 
-    await smtpTransport.sendMail(emailOptions, (err, response) => 
+    smtpTransport.sendMail(emailOptions, (err, response) => 
     { if (err) { 
         smtpTransport.close();
         return errResponse(baseResponse.DB_ERROR) 

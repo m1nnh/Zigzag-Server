@@ -13,7 +13,7 @@ const regSize = /^[0-9]/g;
 const regNum = /^[0-9]/g;
 
 /**
- * API No. 
+ * API No. 9
  * API Name : 홈 상품 조회 API
  * [GET] /products/home
  */
@@ -84,7 +84,7 @@ const regNum = /^[0-9]/g;
 }
 
 /**
- * API No. 
+ * API No. 10
  * API Name : 홈 슬라이드 상품 조회 API
  * [GET] /products/home-slide
  */
@@ -138,7 +138,7 @@ exports.getHomeSlide = async function (req, res) {
  }
 
  /**
- * API No. 
+ * API No. 11
  * API Name : 브랜드 상품 조회 API
  * [GET] /products/brand
  */
@@ -211,7 +211,7 @@ exports.getBrand = async function (req, res) {
 }
 
  /**
- * API No. 
+ * API No. 12
  * API Name : top3 브랜드 상품 조회 API
  * [GET] /products/top3-brand
  */
@@ -346,7 +346,7 @@ exports.getBrandRank = async function (req, res) {
 }
 
 /**
- * API No. 
+ * API No. 13
  * API Name : 랭킹별 브랜드 상품 조회 API
  * [GET] /products/rank-brand
  */
@@ -491,7 +491,7 @@ exports.getTotalRank = async function (req, res) {
 
 
 /**
- * API No. 
+ * API No. 14
  * API Name : 브랜드별 이번 주 베스트 상품 조회 API
  * [GET] /products/:brandIdx/week-best
  */
@@ -556,7 +556,7 @@ exports.getWeekBest = async function (req, res) {
  }
 
  /**
- * API No. 
+ * API No. 15
  * API Name : 브랜드별 카테고리 상품 조회 API
  * [GET] /products/:brandIdx/category
  */
@@ -657,7 +657,7 @@ exports.getBrandCategory = async function (req, res) {
  
 
  /**
- * API No. 
+ * API No. 16
  * API Name : 베스트 상품 조회 API
  * [GET] /products/best
  */
@@ -755,7 +755,7 @@ exports.getBest = async function (req, res) {
 }
 
 /**
- * API No. 
+ * API No. 17
  * API Name : 타임 특가 상품 조회 API
  * [GET] /products/time-sale
  */
@@ -825,7 +825,7 @@ exports.getTimeSale = async function (req, res) {
 }
 
 /**
- * API No. 
+ * API No. 18
  * API Name : 혜택 상품 조회 API (슬라이드)
  * [GET] /products/benefit
  */
@@ -885,7 +885,7 @@ exports.benefit = async function (req, res) {
 
 
 /**
- * API No. 
+ * API No. 19
  * API Name : 혜택 상품 카테고리별 전체 조회 API
  * [GET] /products/:categoryRef/benefit
  */
@@ -974,7 +974,7 @@ exports.getSale = async function (req, res) {
  }
 
  /**
- * API No. 
+ * API No. 20
  * API Name : 신상/혜택 상품 조회 API
  * [GET] /products/new-sale
  */
@@ -1063,7 +1063,7 @@ exports.getNewSale = async function (req, res) {
 }
 
 /**
- * API No. 
+ * API No. 21
  * API Name : 신상품 조회 API
  * [GET] /products/new
  */
@@ -1134,7 +1134,7 @@ exports.getNew = async function (req, res) {
  }
 
  /**
- * API No. 
+ * API No. 22
  * API Name : 상품 인트로 조회 API
  * [GET] /products/:productIdx
  */
@@ -1178,7 +1178,7 @@ exports.getNew = async function (req, res) {
  }
 
  /**
- * API No. 
+ * API No. 23
  * API Name : 상품별 쿠폰 리스트 조회 API
  * [GET] /products/:productIdx/coupon-list
  */
@@ -1239,7 +1239,7 @@ exports.getProductCoupon = async function(req, res) {
  }
  
 /**
- * API No. 
+ * API No. 24
  * API Name : 상품별 쿠폰 등록 API
  * [POST] /products/:productIdx/coupon
  */
@@ -1309,7 +1309,7 @@ exports.postProductCoupon = async function(req, res) {
  }
 
  /**
- * API No. 
+ * API No. 25
  * API Name : 카테고리별 스토어 상품 조회 API
  * [GET] /products/:productIdx
  */
@@ -1420,7 +1420,7 @@ exports.getProductCategoryStore = async function(req, res) {
  }
 
  /**
- * API No. 
+ * API No. 26
  * API Name : 상품 정보 조회 API
  * [GET] /products/:productIdx/info
  */
@@ -1498,7 +1498,7 @@ exports.getProductInfo = async function(req, res) {
 }
 
 /**
- * API No. 
+ * API No. 27
  * API Name : 스토어별 추천 상품 조회 API
  * [GET] /products/:storeIdx/recommendation
  */
@@ -1569,7 +1569,7 @@ exports.getProductRecommendation = async function (req, res) {
 
 
 /**
- * API No. 
+ * API No. 30
  * API Name : 찜 상품 수정 API
  * [PATCH] /products/:productIdx/like
  */
@@ -1628,7 +1628,7 @@ exports.patchLike = async function (req, res) {
  }
 
  /**
- * API No. 
+ * API No. 31
  * API Name : 북마크 스토어 신상품 조회 API
  * [GET] /products/book-mark/store
  */
@@ -1658,7 +1658,7 @@ exports.getBookmarkProduct = async function (req, res) {
     if (!page)
         return res.send(response(baseResponse.PAGE_EMPTY)); // 2012 : page를 입력해주세요.
     
-    if (!regPage.test(page) && page < 1) 
+    if (!regPage.test(page) || page < 1) 
         return res.send(response(baseResponse.PAGE_ERROR_TYPE)); // 2013 : page 번호를 확인해주세요.
 
     if (!size) 
@@ -1677,3 +1677,195 @@ exports.getBookmarkProduct = async function (req, res) {
 
 }
 
+
+/**
+ * API No. 38
+ * API Name : 상품 컬러 조회 API
+ * [GET] /products/:productIdx/color
+ */
+exports.getProductOption = async function (req, res) {
+
+    // Request Token
+    const userIdx = req.verifiedToken.userIdx;
+
+    // Request Path Variable
+    const {productIdx} = req.params;
+    
+    // Request Body
+    const bodyIdx = req.body;
+    
+    // Validation Check (Request Error)
+    if (!userIdx || !bodyIdx) 
+        return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
+
+    if (userIdx !== parseInt(bodyIdx.bodyIdx))
+        return res.send(errResponse(baseResponse.ID_NOT_MATCHING)); // 2020 : userId가 다릅니다.
+
+    const checkUserIdx = await productProvider.userCheck(userIdx);
+
+    if (checkUserIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
+
+    if (!productIdx)
+        return res.send(errResponse(baseResponse.PRODUCTIDX_NOT_EXIST)); // 2048 : productIdx값을 입력해주세요.
+
+    if (regNum.test(productIdx) && productIdx < 1)
+        return res.send(errResponse(baseResponse.PRODUCTIDX_ONLY_NUMBER)); // 2031 : productIdx는 숫자만 입력이 가능합니다.
+    
+    const checkProductIdx = await productProvider.productIdxCheck(productIdx);
+
+    if (checkProductIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.PRODUCTIDX_NOT_EXIST)); // 2026 : 존재하지 않는 상품입니다.
+
+    // Option Result
+    const colorResult = await productProvider.option(productIdx);
+
+    
+    return res.send(response(baseResponse.SUCCESS, colorResult));
+
+}
+
+
+/**
+ * API No. 29
+ * API Name : 상품 사이즈 조회 API
+ * [GET] /products/:productIdx/option
+ */
+exports.getProductSize = async function (req, res) {
+
+    // Request Token
+    const userIdx = req.verifiedToken.userIdx;
+
+    // Reqeust Path Variable
+    const {productIdx} = req.params;
+
+    // Request Query String
+    const {colorIdx} = req.query;
+    
+    // Request Body
+    const bodyIdx = req.body;
+    
+    // Validation Check (Request Error)
+    if (!userIdx || !bodyIdx) 
+        return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
+
+    if (userIdx !== parseInt(bodyIdx.bodyIdx))
+        return res.send(errResponse(baseResponse.ID_NOT_MATCHING)); // 2020 : userId가 다릅니다.
+
+    const checkUserIdx = await productProvider.userCheck(userIdx);
+
+    if (checkUserIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
+
+    if (!productIdx)
+        return res.send(errResponse(baseResponse.PRODUCTIDX_NOT_EXIST)); // 2048 : productIdx값을 입력해주세요.
+
+    if (regNum.test(productIdx) && productIdx < 1)
+        return res.send(errResponse(baseResponse.PRODUCTIDX_ONLY_NUMBER)); // 2031 : productIdx는 숫자만 입력이 가능합니다.
+    
+    const checkProductIdx = await productProvider.productIdxCheck(productIdx);
+
+    if (checkProductIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.PRODUCTIDX_NOT_EXIST)); // 2026 : 존재하지 않는 상품입니다.
+
+    if (!colorIdx)
+        return res.send(errResponse(baseResponse.COLORIDX_EMPTY)) // 2049 : colorIdx 값을 입력해주세요.
+
+    if (regNum.test(colorIdx) && colorIdx < 1)
+        return res.send(errResponse(baseResponse.COLORIDX_ONLY_NUMBER)); // 2050 : colorIdx는 숫자만 입력해주세요.
+
+    const checkColorIdx = await productProvider.colorIdxCheck(productIdx, colorIdx);
+    
+    if (checkColorIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.COUPONIDX_EXIST)); // 2051 : 해당 컬러가 존재하지 않습니다.
+    
+    // Size Result
+    const sizeResult = await productProvider.size(productIdx, colorIdx);
+
+    
+    return res.send(response(baseResponse.SUCCESS, sizeResult));
+
+}
+
+/**
+ * API No. 32
+ * API Name : 카테고리별 상품 조회 API
+ * [GET] /products/category
+ */
+exports.
+getCategoryProduct = async function (req, res) {
+
+    // Request Token
+    const userIdx = req.verifiedToken.userIdx;
+
+    // Request Query String
+    let {page, size, large, medium, small, deliveryFilter, originalFilter} = req.query;
+    
+    let categoryCondition = ''
+    let deliveryCondition = ''
+    let originalCondition = 'order by '
+
+    // Request Body
+    const {bodyIdx} = req.body;
+    
+    // Validation Check (Request Error)
+    if (!userIdx | !bodyIdx) 
+        return res.send(errResponse(baseResponse.USER_USERID_EMPTY)); // 2016 : userId를 입력해주세요.
+
+    if (userIdx !== parseInt(bodyIdx))
+        return res.send(errResponse(baseResponse.ID_NOT_MATCHING)); // 2020 : userId가 다릅니다.
+
+    const checkUserIdx = await productProvider.userCheck(userIdx);
+
+    if (checkUserIdx[0].exist === 0)
+        return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST)) // 2017 : 해당 회원이 존재하지 않습니다.
+
+    if (!page)
+        return res.send(response(baseResponse.PAGE_EMPTY)); // 2012 : page를 입력해주세요.
+    
+    if (!regPage.test(page) && page < 1) 
+        return res.send(response(baseResponse.PAGE_ERROR_TYPE)); // 2013 : page 번호를 확인해주세요.
+
+    if (!size) 
+        return res.send(response(baseResponse.SIZE_EMPTY)); // 2014 : size를 입력해주세요.
+
+    if (!regSize.test(size) && size < 1) 
+        return res.send(response(baseResponse.SIZE_ERROR_TYPE)); // 2015 : size 번호를 확인해주세요.
+    page = size * (page-1);
+
+    if (large) {
+        large = parseInt(large) + 1
+         var categoryIdxRow = await productProvider.categoryIdx(large);
+        let first = categoryIdxRow[1].categoryIdx;
+        let last = categoryIdxRow[categoryIdxRow.length - 1].categoryIdx;
+
+        if (large && !medium && !small)
+            categoryCondition += 'and categoryRef between ' + first + ' and ' + last;
+        else if (large && medium && !small)
+            categoryCondition += 'and categoryRef = ' + medium
+        else if (large && medium && small)
+            categoryCondition += 'and c.categoryIdx = ' + small
+    }
+    else 
+        categoryCondition = ''
+
+    if (deliveryFilter == 1)
+        deliveryCondition += 'and s.deliveryPrice = 0'
+    else
+        deliveryCondition = ''
+    
+    switch(originalFilter) {
+        case '1' : originalCondition += 'ifnull(reviewCount, 0) DESC'; break;
+        case '2' : originalCondition += 'p.createdAt ASC'; break;
+        case '3' : originalCondition += 'productPrice * ((100 - productSale) / 100) ASC'; break;
+        case '4' : originalCondition += 'productPrice * ((100 - productSale) / 100) DESC'; break;
+        default : originalCondition += 'ifnull(readCount, 0) + ifnull(sum(pb.productNum), 0) DESC'; break;
+    } 
+    
+    // Search Product Result
+    const categoryProductResult = await productProvider.cateProduct(userIdx, categoryCondition, deliveryCondition, originalCondition, page, size);
+
+    
+    return res.send(response(baseResponse.SUCCESS, categoryProductResult));
+
+}

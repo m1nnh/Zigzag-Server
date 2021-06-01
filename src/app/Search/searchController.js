@@ -15,7 +15,7 @@ const regSize = /^[0-9]/g;
 const regNum = /^[0-9]/g;
 
 /**
- * API No. 
+ * API No. 51
  * API Name : 검색 내용 생성 API
  * [POST] /search
  */
@@ -63,7 +63,7 @@ exports.postSearch = async function (req, res) {
 }
 
 /**
- * API No. 
+ * API No. 52
  * API Name : 검색 내용 삭제 API
  * [PATCH] /search
  */
@@ -102,7 +102,7 @@ exports.patchSearch = async function (req, res) {
 }
 
 /**
- * API No. 
+ * API No. 53
  * API Name : 최근 검색 내용 조회 API
  * [GET] /search/recent
  */
@@ -135,7 +135,7 @@ exports.getRecentSearch = async function (req, res) {
 }
 
 /**
- * API No. 
+ * API No. 54
  * API Name : 지금 가장 인기있는 검색 조회 API
  * [GET] /search/now-best
  */
@@ -168,7 +168,7 @@ exports.getNowBestSearch = async function (req, res) {
 }
 
 /**
- * API No. 
+ * API No. 55
  * API Name : 검색 상품 조회 API
  * [GET] /search/product-list
  */

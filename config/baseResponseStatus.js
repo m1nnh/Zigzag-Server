@@ -56,6 +56,11 @@ module.exports = {
     DELETE_CONTENTS_NOT_EXIST : { "isSuccess": false, "code": 2045, "message": "삭제할 검색 내용이 없습니다." },
     DUPLICATE_LARGE_AGEFILTER : { "isSuccess": false, "code": 2046, "message": "카테고리 분류 숫자, 나이 필터링 숫자를 동시에 입력할 수 없습니다." },
     COUPON_NOT_EXIST : { "isSuccess": false, "code": 2047, "message": "존재하는 쿠폰이 없습니다." },
+    PRODUCTIDX_EMPTY : { "isSuccess": false, "code": 2048, "message": "productIdx값을 입력해주세요." },
+    COLORIDX_EMPTY : { "isSuccess": false, "code": 2049, "message": "colorIdx 값을 입력해주세요." },
+    COLORIDX_ONLY_NUMBER : { "isSuccess": false, "code": 2050, "message": "colorIdx는 숫자만 입력해주세요." },
+    COLORIDX_NOT_EXISTS : { "isSuccess": false, "code": 2051, "message": "해당 컬러가 존재하지 않습니다." },
+
     // Response error
     SIGNUP_REDUNDANT_EMAIL : { "isSuccess": false, "code": 3001, "message":"중복된 이메일입니다." },
     SIGNUP_REDUNDANT_PHONENUM : { "isSuccess": false, "code": 3002, "message":"중복된 휴대폰 번호입니다." },

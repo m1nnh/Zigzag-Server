@@ -16,7 +16,7 @@ const regNum = /^[0-9]/g;
 
 
 /**
- * API No. 
+ * API No. 33
  * API Name : 브랜드별 인트로 조회 API
  * [GET] /brands/:brandIdx/intro
  */
@@ -60,7 +60,7 @@ exports.getBrandIntro = async function(req, res) {
  }
 
  /**
- * API No. 
+ * API No. 34
  * API Name : 브랜드별 쿠폰 리스트 조회 API
  * [GET] /brands/:brandIdx/coupon-list
  */
@@ -124,7 +124,7 @@ exports.getBrandCoupon = async function(req, res) {
  }
  
 /**
- * API No. 
+ * API No. 35
  * API Name : 브랜드별 쿠폰 등록 API
  * [POST] /brands/:brandIdx/coupon
  */
@@ -192,7 +192,7 @@ exports.postBrandCoupon = async function(req, res) {
  }
 
  /**
- * API No. 
+ * API No. 36
  * API Name : 브랜드 북마크 수정 API
  * [PATCH] /brands/:brandIdx/book-mark
  */
@@ -251,7 +251,7 @@ exports.patchBrandBookmark = async function (req, res) {
  }
 
  /**
- * API No. 
+ * API No. 37
  * API Name : 브랜드 전체 랭킹 조회 API
  * [GET] /brands/total-rank
  */
@@ -302,7 +302,7 @@ exports.getTotalRank = async function(req, res) {
 
 
  /**
- * API No. 
+ * API No. 38
  * API Name : 신규 입점 브랜드 조회 API
  * [GET] /brands/new
  */
