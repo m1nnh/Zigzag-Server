@@ -15,7 +15,7 @@ const regSize = /^[0-9]/g;
 const regNum = /^[0-9]/g;
 
 /**
- * API No. 
+ * API No. 39
  * API Name : 상품별 메인 리뷰 조회 API
  * [PATCH] /reviews/:productIdx/main
  */
@@ -66,7 +66,7 @@ exports.getMainReview = async function (req, res) {
  }
 
  /**
- * API No. 
+ * API No. 40
  * API Name : 상품별 토탈 리뷰 타이틀 조회 API
  * [PATCH] /reviews/:products/total-title
  */
@@ -107,7 +107,7 @@ exports.getTotalReviewTitle = async function (req, res) {
 }
 
 /**
- * API No. 
+ * API No. 41
  * API Name : 상품별 토탈 리뷰 조회 API
  * [PATCH] /reviews/:productIdx/total
  */
@@ -193,7 +193,7 @@ exports.getTotalReview = async function (req, res) {
 }
 
 /**
- * API No. 
+ * API No. 42
  * API Name : 리뷰 좋아요 플래그 수정 API
  * [PATCH] /reviews/like-flag
  */

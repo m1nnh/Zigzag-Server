@@ -59,10 +59,19 @@ module.exports = function(app){
     // API No. 27 스토어별 추천 상품 조회 API
     app.get('/products/:storeIdx/recommendation', jwtMiddleware, product.getProductRecommendation);
 
-    // API No. 29 찜 상품 수정 API
+    // API No. 28 상품 컬러 조회 API
+    app.get('/products/:productIdx/color', jwtMiddleware, product.getProductOption);
+
+    // API No. 29 상품 사이즈 조회 API
+    app.get('/products/:productIdx/size', jwtMiddleware, product.getProductSize);
+
+    // API No. 30 찜 상품 수정 API
     app.patch('/products/:productIdx/like', jwtMiddleware, product.patchLike);
 
-    // API No. ? 북마크 스토어 신상품 조회 API
+    // API No. 31 북마크 스토어 신상품 조회 API
     app.get('/products/new/book-mark-store', jwtMiddleware, product.getBookmarkProduct);
+
+    // API No. 32 카테고리별 상품 조회 API
+    app.get('/products/category', jwtMiddleware, product.getCategoryProduct);
 
 };

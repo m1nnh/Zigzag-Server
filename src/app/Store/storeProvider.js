@@ -173,3 +173,13 @@ exports.getBookmarkStore = async function (userIdx, condition, page, size) {
   
     return bookmarkStoreResult;
 };
+
+// Get Search Store
+exports.searchStore = async function (userIdx, contents, page, size) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const searchStoreResult = await storeDao.selectSearchStore(connection, [userIdx, contents, page, size]);
+  
+    connection.release();
+  
+    return searchStoreResult;
+};

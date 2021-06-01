@@ -326,8 +326,12 @@ exports.productIntro = async function (productIdx, userIdx) {
   var productIntro;
   var ca = [];
   var cl = [];
+  var result;
+  var productTitle;
+  var benefitInfo;
+  var zonlyInfo;
 
-
+  var introResult;
   // Transaction
   try {
     const connection = await pool.getConnection(async (conn) => conn);
@@ -339,27 +343,40 @@ exports.productIntro = async function (productIdx, userIdx) {
       // Get Product Intro
       productIntro = await productDao.selectProductIntro(connection, productIdx);
       
-      // Get Bookmark Status
-      const bookmarkStatus = await productDao.selectStoreStatus(connection, userIdx);
       const storeIdx = productIntro[0].storeIdx;
 
+      productTitle = {
+        productImage : productImage,
+        storeIdx : productIntro[0].storeIdx,
+        productIdx : productIntro[0].productIdx,
+        zFlag : productIntro[0].zFlag,
+        productContents : productIntro[0].productContents,
+        score : productIntro[0].score,
+        reviewCount : productIntro[0].reviewCount,
+        zSaleStatus : productIntro[0].zSaleStatus,
+        salePercentage : productIntro[0].salePercentage,
+        resultPrice : productIntro[0].resultPrice,
+        originPrice : productIntro[0].originPrice
+      }
+
+      benefitInfo = {
+        primaryBenefit : productIntro[0].productPayInfo,
+        cardSale : productIntro[0].productPayInfo
+      }
+
+      zonlyInfo = {
+        productReceiptDay : productIntro[0].productReceiptDay,
+        deliveryPrice : productIntro[0].deliveryPrice,
+        deliveryInfo : productIntro[0].deliveryInfo,
+        reInfo : productIntro[0].reInfo
+      }
+      
       // Get StoreInfo
-      storeInfo = await productDao.selectStoreInfo(connection, storeIdx);
+      storeInfo = await productDao.selectStoreInfo(connection, [userIdx, storeIdx]);
 
       // Get First Category Reference List
       const firstCategoryRefList = await productDao.selectFirstCategoryList(connection, storeIdx);
 
-      // productIntro <- Image Insert
-      productIntro[0]["productImage"] = productImage;
-
-      // productIntro <- storeInfo Insert
-      productIntro[1] = storeInfo[0]
-
-      // productIntro <- bookmarkStatus Insert
-      if (bookmarkStatus.length === 0)
-        productIntro[1]["bookmarkStatus"] = 'N';
-      else
-        productIntro[1]["bookmarkStatus"] = bookmarkStatus[0].status;
 
       // Get Second CategoryIdx 
       for (var i = 0; i < firstCategoryRefList.length; i++) {
@@ -390,11 +407,9 @@ exports.productIntro = async function (productIdx, userIdx) {
       }
 
       // Array
-      productIntro[1]["categoryList"] = cl[0];
+      storeInfo[0]["categoryList"] = cl;
 
-      // productIntro <- CategoryIdx, CategoryName Insert
-      for (var i = 1; i < cl.length; i++)
-        productIntro[1]["categoryList"].push(cl[i][0]);
+      introResult = {productTitle, benefitInfo, zonlyInfo, storeInfo};
 
       // Insert Readcount
       await productDao.insertReadCount(connection, [productIdx, userIdx]);
@@ -416,7 +431,7 @@ exports.productIntro = async function (productIdx, userIdx) {
   }
   
 
-  return productIntro;
+  return introResult;
 }
 
 // Get Store Name
@@ -558,3 +573,38 @@ exports.categoryCheck= async function (brandIdx, categoryIdx) {
   return checkResult;
 };
 
+// Color Result
+exports.option= async function (productIdx) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const optionResult = await productDao.selectOption(connection, productIdx);
+  connection.release();
+
+  return optionResult;
+};
+
+// Check ColorIdx
+exports.colorIdxCheck= async function (productIdx, colorIdx) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const checkResult = await productDao.selectColorCheck(connection, [productIdx, colorIdx]);
+  connection.release();
+
+  return checkResult;
+};
+
+// Size Result
+exports.size= async function (productIdx, colorIdx) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const sizeResult = await productDao.selectSize(connection, [productIdx, colorIdx]);
+  connection.release();
+
+  return sizeResult;
+};
+
+// Category Product Result
+exports.cateProduct= async function (userIdx, categoryCondition, deliveryCondition, originalCondition, page, size) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const productResult = await productDao.selectCateProduct(connection, [userIdx, categoryCondition, deliveryCondition, originalCondition, page, size]);
+  connection.release();
+
+  return productResult;
+};
