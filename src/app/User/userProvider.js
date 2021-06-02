@@ -43,3 +43,14 @@ exports.signUpProfile = async function (userIdx) {
 
   return getProfileResult[0];
 };
+
+// Get userIdx
+exports.getUserInfo = async function (email) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const getUserInfoResult = await userDao.selectUserInfo(connection, email);
+
+  connection.release();
+
+  return getUserInfoResult;
+};
+

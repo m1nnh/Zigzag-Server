@@ -53,8 +53,9 @@ async function selectLogin(connection, [email, hashedPassword]) {
     from User
     where userEmail = ? and userPassword = ?;
    `;
-
+  
   const [loginCheckRow] = await connection.query(loginCheckQuery, [email, hashedPassword]);
+
   return loginCheckRow;
 }
 
@@ -63,7 +64,7 @@ async function userLogout(connection, userIdx) {
   const logoutQuery = `
   update User
   set isLogin = 'N'
-  where userIdx = ?`;
+  where userIdx = ?;`;
   const logoutRow = await connection.query(logoutQuery, userIdx);
   return logoutRow[0];
 }
@@ -93,11 +94,30 @@ async function updatePhoneNum(connection, [userIdx, userPhoneNum]) {
   const updatePhoneNumQuery = `
   update User
   set userPhoneNum = ?
-  where userIdx = ?`;
+  where userIdx = ?;`;
   const updatePhoneNumRow = await connection.query(updatePhoneNumQuery, [userPhoneNum, userIdx]);
   return updatePhoneNumRow[0];
 }
 
+// Select userIdx, userName
+async function selectUserInfo(connection, email) {
+  const userInfoQuery = `
+  select userIdx, userName
+  from User
+  where userEmail = ?;`;
+  const [userInfoRow] = await connection.query(userInfoQuery, email);
+  return userInfoRow;
+}
+
+// Patch Password
+async function updatePassword(connection, [email, hashedPassword]) {
+  const updateQuery = `
+  update User
+  set userPassword = ?
+  where userEmail = ?;`;
+  const [updateRow] = await connection.query(updateQuery, [hashedPassword, email]);
+  return updateRow;
+}
 
 module.exports = {
   selectEmail,
@@ -108,5 +128,7 @@ module.exports = {
   userLogout,
   updateAll,
   updateName,
-  updatePhoneNum
+  updatePhoneNum,
+  selectUserInfo,
+  updatePassword
 };

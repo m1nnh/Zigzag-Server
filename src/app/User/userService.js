@@ -113,3 +113,13 @@ exports.editPhoneNum = async function (userIdx, userPhoneNum) {
 
     return updatePhoneNumResult;
 }
+
+// Patch Password
+exports.patchPassword = async function (email, hashedPassword) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const updatePasswordResult = await userDao.updatePassword(connection, [email, hashedPassword]);
+
+    connection.release();
+
+    return updatePasswordResult;
+}

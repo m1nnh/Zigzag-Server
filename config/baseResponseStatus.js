@@ -60,6 +60,10 @@ module.exports = {
     COLORIDX_EMPTY : { "isSuccess": false, "code": 2049, "message": "colorIdx 값을 입력해주세요." },
     COLORIDX_ONLY_NUMBER : { "isSuccess": false, "code": 2050, "message": "colorIdx는 숫자만 입력해주세요." },
     COLORIDX_NOT_EXISTS : { "isSuccess": false, "code": 2051, "message": "해당 컬러가 존재하지 않습니다." },
+    ACCESS_TOKEN_EMPTY : { "isSuccess": false, "code": 2052, "message": "accessToken을 입력해주세요." },
+    ACCESS_TOKEN : { "isSuccess": false, "code": 2053, "message": "유효하지 않는 엑세스 토큰입니다." },
+    // 2054
+    // 
 
     // Response error
     SIGNUP_REDUNDANT_EMAIL : { "isSuccess": false, "code": 3001, "message":"중복된 이메일입니다." },

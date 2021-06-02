@@ -405,11 +405,13 @@ exports.productIntro = async function (productIdx, userIdx) {
           cl.push(result);
 
       }
+      storeInfo[0]["categoryList"] = cl[0];
 
-      // Array
-      storeInfo[0]["categoryList"] = cl;
+      for (var i = 1; i < cl.length; i++) 
+          storeInfo[0].categoryList.push(cl[i][0]);
 
       introResult = {productTitle, benefitInfo, zonlyInfo, storeInfo};
+      
 
       // Insert Readcount
       await productDao.insertReadCount(connection, [productIdx, userIdx]);
