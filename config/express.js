@@ -2,6 +2,7 @@ const express = require('express');
 const compression = require('compression');
 const methodOverride = require('method-override');
 var cors = require('cors');
+
 module.exports = function () {
     const app = express();
 
@@ -24,6 +25,9 @@ module.exports = function () {
     require('../src/app/Brand/brandRoute')(app);
     require('../src/app/Review/reviewRoute')(app);
     require('../src/app/Search/searchRoute')(app);
+    
+
+
     // require('../src/app/Board/boardRoute')(app);
 
     return app;
