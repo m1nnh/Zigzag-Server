@@ -1221,18 +1221,18 @@ exports.getProductCoupon = async function(req, res) {
     
     var result = []
     result[0] = storeName[0];
-    result[1] = productCouponResult;
+    result[0]["couponList"] = productCouponResult;
 
-    result[1][0]["status"] = 'N'
-
-    for (var i = 0; i < result[1].length; i++) {
-        var couponIdx = result[1][i].couponIdx;
+    result[0].couponList[0]["status"] = 'N'
+    console.log(result[0].couponIdx);
+    for (var i = 0; i < result[0].couponList.length; i++) {
+        var couponIdx = result[0].couponList[i].couponIdx;
         var have = await productProvider.haveFlag(couponIdx, userIdx);
 
         if (have[0].exist === 0)
-            result[1][i]["status"] = 'N'
+            result[0].couponList[i]["status"] = 'N'
         else 
-            result[1][i]["status"] = 'Y'
+            result[0].couponList[i]["status"] = 'Y'
     }
 
     return res.send(response(baseResponse.SUCCESS, result));
