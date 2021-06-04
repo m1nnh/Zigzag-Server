@@ -323,7 +323,7 @@ exports.kakaoLogin = async function(req, res) {
 /**
  * API No. 7
  * API Name : 비밀번호 찾기 API
- * [POST] /users/sign-up
+ * [POST] /users/find-password
  */
 
 function createCode(numeric, alphabet, signal) {
@@ -345,7 +345,6 @@ function createCode(numeric, alphabet, signal) {
 exports.findPassword = async function (req, res) { 
 
     const {email} = req.body;
-    console.log(email);
     if (!email)
         return res.send(errResponse(baseResponse.SIGNUP_EMAIL_EMPTY)) // 2001 : 이메일을 입력해주세요.
 
@@ -392,3 +391,70 @@ exports.findPassword = async function (req, res) {
     }
    
 };
+
+/**
+ * API No. 
+ * API Name : 푸쉬 알림
+ * 
+ */
+
+exports.fcmPush = async function (req, res) {    
+    try {
+        let message = {
+            data: {
+                title: "테스트",
+                body: "안녕하세요",
+            },
+            token: ""
+        };
+
+        admin
+            .messaging()
+            .send(message)
+            .then(function (response) {
+                console.log('성공 ! ', response);
+            })
+            .catch(function (err) {
+                console.log(err);
+            })
+    } catch (err) {
+        logger.error(`App - nonUser Query error\n: ${JSON.stringify(err)}`);
+        return res.json(response.successFalse(4000, "서버와의 통신에 실패하였습니다."));
+    }
+}
+
+/**
+ * API No. 
+ * API Name : FCM 토큰 갱신
+ * 
+ */
+exports.updateFcm = async function (req, res) {    
+    let token = req.headers['x-access-token'] || req.query.token;
+    const {fcmToken} = req.body;
+
+    if (token) token = jwt.verify(token, secret_config.jwtsecret);
+    if (fcmToken === undefined) return res.json(response.successFalse(2060, "fcmToken을 입력해주세요."));
+    
+    try {
+        if (token === undefined) {
+            const state = `nonUserId from NonUser where nonUserId = ${Number(nonUserId)}`;
+            const result = await userDao.getUserNonUser(state);
+    
+            
+        
+            const userId = token.userId;
+            const state = `userId from User where userId = ${Number(userId)}`;
+            const result = await userDao.getUserNonUser(state);
+    
+            if (!result) return res.json(response.successFalse(3000, "존재하지 않는 회원입니다."));
+            else {
+                const status = `User set fcmToken = '${fcmToken}' where userId = ${userId}`;
+                await userDao.updateUserFcm(status);
+            }
+    }
+        return res.json(response.successTrue(1000, "fcm 토큰을 갱신하였습니다."));
+    } catch (err) {
+        logger.error(`App - updateFcm Query error\n: ${JSON.stringify(err)}`);
+        return res.json(response.successFalse(4000, "서버와의 통신에 실패하였습니다."));
+    }
+}
