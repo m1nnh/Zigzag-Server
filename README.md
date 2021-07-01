@@ -78,4 +78,6 @@
 ### 📹 Vedio
 
 - 클라이언트 시연 영상
+  - [Youtube](https://youtu.be/bTpqDzdvERw)
 - 서버 시연 영상 (`Postman` Test)
+  - [Youtube](https://youtu.be/0n2Rf837mBI)
