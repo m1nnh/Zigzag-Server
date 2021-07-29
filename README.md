@@ -22,37 +22,37 @@
       |    ├── 📄 BrandDao.js 		
       |    ├── 📄 BrandProvider.js   		
       |    ├── 📄 BrandRoute.js   		 
-      |    ├── 📄 BrandService.js   		 
+      |    └── 📄 BrandService.js   		 
       ├── 📂 Product          		
       |    ├── 📄 ProductController.js          	
       |    ├── 📄 ProductDao.js 		
       |    ├── 📄 ProductProvider.js   		
       |    ├── 📄 ProductRoute.js   		 
-      |    ├── 📄 ProductService.js   	
+      |    └── 📄 ProductService.js   	
       ├── 📂 Review         		
       |    ├── 📄 ReviewController.js          	
       |    ├── 📄 ReviewDao.js 		
       |    ├── 📄 ReviewProvider.js   		
       |    ├── 📄 ReviewRoute.js   		 
-      |    ├── 📄 ReviewService.js   	
+      |    └── 📄 ReviewService.js   	
       ├── 📂 Search          		
       |    ├── 📄 SearchController.js          	
       |    ├── 📄 SearchDao.js 		
       |    ├── 📄 SearchProvider.js   		
       |    ├── 📄 SearchRoute.js   		 
-      |    ├── 📄 SearchService.js   	
+      |    └── 📄 SearchService.js   	
       ├── 📂 Store          	
       |    ├── 📄 StoreController.js          	
       |    ├── 📄 StoreDao.js 		
       |    ├── 📄 StoreProvider.js   	
       |    ├── 📄 StoreRoute.js   		 
-      |    ├── 📄 StoreService.js  
-      ├── 📂 User          		
-      |    ├── 📄 UserController.js          	
-      |    ├── 📄 UserDao.js 	
-      |    ├── 📄 UserProvider.js   		
-      |    ├── 📄 UserRoute.js   		 
-      |    ├── 📄 UserService.js  
+      |    └── 📄 StoreService.js  
+      └── 📂 User          		
+           ├── 📄 UserController.js          	
+           ├── 📄 UserDao.js 	
+           ├── 📄 UserProvider.js   		
+           ├── 📄 UserRoute.js   		 
+           └── 📄 UserService.js  
 📄 .gitignore                     		
 📄 index.js                                                        	 
 📄 package.json                      
