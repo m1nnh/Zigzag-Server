@@ -66,9 +66,6 @@
 
 ![image](https://user-images.githubusercontent.com/78870076/120744839-dbb65e80-c536-11eb-8127-d85b001a7123.png)
 
-  - [Aquerytool](https://aquerytool.com:443/aquerymain/index/?rurl=d4462468-9965-44d8-9a74-e10705ecee87)
-  - Password : 71q41r
-
 - API 구현 및 명세서 작성
 - 카카오 로그인 (OAuth)
 - 임시 비밀번호 발급 (Nodemailer)
