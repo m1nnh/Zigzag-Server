@@ -74,7 +74,7 @@
 
 ![image](https://user-images.githubusercontent.com/78870076/120702010-8c4c4000-c4ee-11eb-85ec-763de534938a.png)
 
-### 📹 Vedio
+### 📹 Video
 
 - 클라이언트 시연 영상
   - [Youtube](https://youtu.be/bTpqDzdvERw)
